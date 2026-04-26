@@ -1,0 +1,33 @@
+- title: Trustworthy AI Luxembourg Meetup
+  role: Organizer
+  description: Monthly meetups with 30+ participants focused on ethical and robust AI systems. Organized talks, discussions, and networking sessions.
+  images:
+    - /assets/img/events/TAI.png
+    - /assets/img/events/TAI1.jpeg
+    - /assets/img/events/TAI2.jpg
+    - /assets/img/events/TAI3.jpg
+    - /assets/img/events/TAI4.jpg
+  link: https://www.meetup.com/luxembourg-trustworthy-ai/
+
+- title: ISSTA 2025
+  role: Diversity & Inclusion Chair
+  description: Led D&I initiatives including local support, financial aid, and outreach to underrepresented groups. Organized the first ISSTA Software Inclusion session. 
+  images:
+    - /assets/img/events/issta1.jpg
+    - /assets/img/events/issta2.jpeg
+  link: https://conf.researchr.org/home/issta-2025
+
+- title: SPLC 2024
+  role: Proceedings Chair
+  description: Managed the end-to-end publication process, coordinated with authors and publishers for timely submission.
+  images:
+    - /assets/img/events/splc.PNG
+  link: https://2024.splc.net/
+
+- title: SiMLA 2024
+  role: Publicity & Workshop Chair
+  description: Spread the word about the workshop and chaired the in-person session.
+  images:
+    - /assets/img/events/simla.jpg
+  link: https://simla-workshop.github.io/Simla2024/
+
