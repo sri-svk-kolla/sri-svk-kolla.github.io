@@ -1,0 +1,4 @@
+User-agent: *
+Disallow:
+
+Sitemap: https://salijona.github.io/sitemap.xml
