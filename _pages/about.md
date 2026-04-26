@@ -1,26 +1,44 @@
 ---
 layout: about
-title: About
+title: about
 permalink: /
-subtitle: 
+subtitle: >
+  <a href="https://www.utwente.nl/ms" target="_blank">Manufacturing Systems</a> ·
+  <a href="https://www.utwente.nl/dpm" target="_blank">Design, Production and Management</a> ·
+  <a href="https://www.utwente.nl/en/et" target="_blank">Faculty of Engineering Technology</a> ·
+  University of Twente
 
 profile:
   align: right
-  image: prof_pic.jpeg
-  image_circular: false # crops the image to make it circular
+  image: prof_pic.png
+  image_circular: false
   more_info: >
+    <p>Horst Complex, room W227</p>
+    <p>De Horst 2, 7522 LW Enschede</p>
+    <p>The Netherlands</p>
+    <p><a href="mailto:s.kolla@utwente.nl">s.kolla@utwente.nl</a></p>
+    <p>+31 53 489 4514</p>
 
-news: true # includes a list of news items
-selected_papers: false # includes a list of papers marked as "selected={true}"
-social: true # includes social icons at the bottom of the page
+selected_papers: true
+social: true
+
+announcements:
+  enabled: true
+  scrollable: true
+  limit: 5
+
+latest_posts:
+  enabled: false
+  scrollable: true
+  limit: 3
 ---
 
-Hi! I’m a researcher working at the intersection of AI/ML and Cybersecurity. Currently I work at Swift, on ensuring secure adoption of AI systems in the financial sector.
+I am an Assistant Professor in [Manufacturing Systems](https://www.utwente.nl/ms) at the [University of Twente](https://www.utwente.nl), part of the [Department of Design, Production and Management](https://www.utwente.nl/dpm) within the [Faculty of Engineering Technology](https://www.utwente.nl/en/et).
 
-My research focuses on making AI/ML systems more secure and trustworthy, especially against adversarial attacks. I’m particularly interested in high-stakes domains like malware detection or fraud prevention, where small vulnerabilities can have serious consequences. Recently, I’ve also been exploring synthetic data for tabular datasets.
+As a dedicated manufacturing engineer, my goal is to create and promote **sustainable, human-centered production systems**. My research sits at the intersection of Industry 5.0, ergonomics, and smart manufacturing — exploring how technology can be designed to serve people and the planet.
 
-If you’d like a quick overview, here’s a [5-minute pitch video](https://www.youtube.com/watch?v=AD5uB0sp4Bo) with the motivation, the challenges, and what makes this research both exciting and necessary.
+My work focuses on **adaptive workplaces**, **assistance systems**, and the use of technologies such as motion capture and digital human modeling to improve worker well-being in manufacturing environments. I am particularly interested in how Cyber-Physical Production Systems (CPPS) can be made more sustainable and human-centered.
 
-I completed my Ph.D. at the [University of Luxembourg](https://www.uni.lu/en/), my Master's  at the [University of Tartu](https://ut.ee/en) in Estonia and my Bachelor's at the [University of Tirana](https://unitir.edu.al/eng/) in Albania, including a one-year exchange at [NTNU](https://www.ntnu.edu/) in Norway.
+I completed my doctoral training at the [University of Luxembourg](https://www.uni.lu/en/) and am a Fellow of the Higher Education Academy (FHEA).
 
-Always happy to chat about adversarial threats and defenses in AI/ML, feel free to get in touch!
+I am always happy to discuss research, collaborations, or any topic related to manufacturing systems — feel free to get in touch!
