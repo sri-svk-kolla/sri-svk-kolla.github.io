@@ -1,1 +1,777 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.3.4">Jekyll</generator><link href="https://salijona.github.io/feed.xml" rel="self" type="application/atom+xml"/><link href="https://salijona.github.io/" rel="alternate" type="text/html" hreflang="en"/><updated>2026-04-26T14:10:19+00:00</updated><id>https://salijona.github.io/feed.xml</id><title type="html">blank</title><subtitle>A simple, whitespace theme for academics. Based on [*folio](https://github.com/bogoli/-folio) design. </subtitle><entry><title type="html">3. From Testing to Defenses: When Realistic Attacks Help</title><link href="https://salijona.github.io/blog/2025/hardening/" rel="alternate" type="text/html" title="3. From Testing to Defenses: When Realistic Attacks Help"/><published>2025-09-09T00:00:00+00:00</published><updated>2025-09-09T00:00:00+00:00</updated><id>https://salijona.github.io/blog/2025/hardening</id><content type="html" xml:base="https://salijona.github.io/blog/2025/hardening/"><![CDATA[<p>So far in this series, we’ve seen how adversarial testing often relies on unrealistic attacks, giving AI developers a false sense of security. What testing really provides is a map of weaknesses. It shows where the shield has cracks. The real challenge comes next: hardening those weak points, so the shield can withstand real-world attacks. As researchers and practitioners, we must remember that testing is only a tool. The ultimate goal is defense.</p> <p>Hardening means repeatedly exposing your model to attacks and forcing it to adapt. You generate adversarial examples, retrain the model using the true or intended labels for those examples, test again, and repeat the cycle. Over time, the model learns to resist the tricks attackers are likely to use. In practice, this process goes by different names depending on technical variations, such as adversarial training, retraining, or fine-tuning. Regardless of the name, the goal is always the same: to expose the model to hostile conditions so it is prepared for real-world attacks.</p> <p>In the figure below, left side shows a malware detector identifying malware files. We then create adversarial examples, shown as the two files with arrows, that exploit weaknesses in the model’s decision boundary. In right side, the model has been retrained using these adversarial samples, which updates the decision boundary. The model can now correctly detect the files that previously slipped through. While the figure uses only two examples for illustration, in practice retraining would involve thousands or even hundreds of thousands of samples to make the model significantly more robust.</p> <div class="row mt-3"> <div class="col-sm mt-3 mt-md-0 text-center"> <figure> <picture> <source class="responsive-img-srcset" srcset="/assets/img/series/unhardened_model-480.webp 480w,/assets/img/series/unhardened_model-800.webp 800w,/assets/img/series/unhardened_model-1400.webp 1400w," type="image/webp" sizes="95vw"/> <img src="/assets/img/series/unhardened_model.png" class="img-fluid rounded z-depth-1" width="90%" height="auto" data-zoomable="" loading="lazy" onerror="this.onerror=null; $('.responsive-img-srcset').remove();"/> </picture> </figure> <p><em>Decision bounadary before adversarial hardening</em></p> </div> <div class="col-sm mt-3 mt-md-0 text-center"> <figure> <picture> <source class="responsive-img-srcset" srcset="/assets/img/series/hardened_model-480.webp 480w,/assets/img/series/hardened_model-800.webp 800w,/assets/img/series/hardened_model-1400.webp 1400w," type="image/webp" sizes="95vw"/> <img src="/assets/img/series/hardened_model.png" class="img-fluid rounded z-depth-1" width="90%" height="auto" data-zoomable="" loading="lazy" onerror="this.onerror=null; $('.responsive-img-srcset').remove();"/> </picture> </figure> <p><em>Updated decision boundary after retraining on adversarial examples</em></p> </div> </div> <p class="text-center mt-2"> <em>Figure: A malware detector predicting Windows binary files as being malicious or not</em> </p> <p>But here’s the key question:</p> <blockquote> <p>Does the realism of adversarial examples used in hardening matter?</p> </blockquote> <p>Consider the malware detector above. An unrealistic attack might modify a malicious file in ways that break it. Even if the detector lets it run, the attack fails because the file cannot execute. A realistic attack, by contrast, carefully modifies the malware to evade detection while still achieving its malicious goal, such as locking the computer, making it much harder to stop. If the model is trained only on unrealistic examples, it may still fail against realistic ones. This uncertainty is exactly what our study set out to investigate in <em><a href="https://ieeexplore.ieee.org/document/10179316">On the Empirical Effectiveness of Unrealistic Adversarial Hardening Against Realistic Adversarial Attacks</a></em>.</p> <p>Generating unrealistic attacks is fast and inexpensive because they can be created without worrying about whether the file will execute. Crafting realistic attacks, by contrast, is far more costly in both computation and engineering effort. Modifying malware to evade detection requires carefully changing executable files without breaking them and testing them in a specialized sandbox to ensure they still carry out their malicious purpose (e.g., asking for ransom). This process can take tens of thousands of times longer than simply altering a few bytes at random, which can take days or even weeks. If unrealistic examples can expose the same weak points in the model’s decision boundary as realistic attacks, they could serve as effective stand-ins, potentially saving substantial time and resources in the hardening process.</p> <div class="row mt-3"> <div class="col-sm mt-3 mt-md-0 text-center"> <figure> <picture> <source class="responsive-img-srcset" srcset="/assets/img/series/unrealistic_example-480.webp 480w,/assets/img/series/unrealistic_example-800.webp 800w,/assets/img/series/unrealistic_example-1400.webp 1400w," type="image/webp" sizes="95vw"/> <img src="/assets/img/series/unrealistic_example.png" class="img-fluid rounded z-depth-1" width="90%" height="auto" data-zoomable="" loading="lazy" onerror="this.onerror=null; $('.responsive-img-srcset').remove();"/> </picture> </figure> <p><em>Unrealistic example (malicious file that does not execute)</em></p> </div> <div class="col-sm mt-3 mt-md-0 text-center"> <figure> <picture> <source class="responsive-img-srcset" srcset="/assets/img/series/realistic_example-480.webp 480w,/assets/img/series/realistic_example-800.webp 800w,/assets/img/series/realistic_example-1400.webp 1400w," type="image/webp" sizes="95vw"/> <img src="/assets/img/series/realistic_example.png" class="img-fluid rounded z-depth-1" width="90%" height="auto" data-zoomable="" loading="lazy" onerror="this.onerror=null; $('.responsive-img-srcset').remove();"/> </picture> </figure> <p><em>Realistic example (infects computer and asks for ransom)</em></p> </div> </div> <p class="text-center mt-2"> <em>Figure: Adversarial examples used to harden the model.</em> </p> <p>We hoped that unrealistic attacks could help harden models against real-world threats, so we tested the impact of unrealistic attacks alongside realistic ones across three distinct domains: text classification, botnet detection, and malware detection, each presenting unique challenges.</p> <ul> <li> <p><strong>Text classification:</strong> Simple tricks like character swaps provided only modest improvements in robustness, while attacks that preserved meaning, such as swapping words with synonyms, were far more effective.</p> </li> <li> <p><strong>Botnet detection:</strong> In this domain, the model’s vulnerabilities aligned closely with even simple, unrealistic attacks, making the hardening process more forgiving.</p> </li> <li> <p><strong>Malware detection:</strong> This proved the toughest case. Unrealistic attacks failed entirely because they never reached the model’s true blind spots, leaving the system exposed.</p> </li> </ul> <p>Across these domains, it became clear that the effectiveness of unrealistic hardening depends on how closely attacks target the model’s critical weaknesses.</p> <p>We also tried increasing the number of unrealistic examples used in the hardening process for malware and botnets to see if it was simply a matter of quantity, but the results did not change.</p> <p>These results show that robustness isn’t about generating more examples, but about generating the right ones. Unrealistic attacks only help when they push the model in the same direction and touch the same critical features as real attacks. In our study, this alignment occurred for botnets, where even cheap, simple attacks nudged the model toward real robustness. For malware, however, the alignment didn’t exist. No matter how many unrealistic examples we produced, the models remained exposed.</p> <p>Looking at these outcomes, it’s easy to see the next step. First, a model trained on unrealistic attacks may seem secure, but real robustness is measured by its response to realistic, unseen threats. Second, even small sets of realistic adversarial examples can be extremely valuable, acting like a compass to guide cheaper, easier-to-generate attacks toward the most critical vulnerabilities. Instead of relying solely on toy attacks for convenience, we should focus on shaping them to reflect the characteristics of real-world threats.</p> <p>The stakes of ignoring realism in adversarial hardening are high. A model that seems robust in the lab may still fail catastrophically when faced with real-world attacks, leaving organizations vulnerable to malware, spam campaigns, or network intrusions. Overconfidence in lab-tested models can lead to wasted resources, false security, and even regulatory or reputational consequences if attacks succeed. By focusing on realistic adversarial examples, even a small carefully curated set, we can guide cheaper, simpler attacks toward the model’s true weaknesses, ensuring that hardening translates into real-world resilience. In short, as we emphasized realism in testing, we must demand it in hardening.</p> <p><strong>A note on scope and generalization:</strong></p> <p>When presenting results by domain (text classification, botnet detection, and malware detection), we used a fixed model architecture, a fixed hardening strategy, and a fixed feature representation for each domain. As a result, the findings within each domain may not generalize to other architectures, hardening methods, or feature sets. Future work could explore more expansive settings, similar to the approach taken by Bostani et al. in <em><a href="https://arxiv.org/abs/2412.18218">On the Effectiveness of Adversarial Training on Malware Classifiers</a></em>.</p> <hr/> <p><strong>Note:</strong> <em>This blog series is based on research about the realism of current adversarial attacks from my time at the SerVal group, SnT (University of Luxembourg). It’s an easy-to-digest format for anyone interested in the topic, especially those who may not have time (or willingness) to read our full papers.</em></p> <p><em>The work and results presented here are a team effort, including <a href="https://maxcordy.github.io/">Asst. Prof. Dr. Maxime Cordy</a>, <a href="https://scholar.google.com/citations?user=4RhGnOoAAAAJ&amp;hl=en&amp;oi=ao">Dr. Thibault Simonetto</a>, <a href="https://scholar.google.com/citations?user=UcvKgR0AAAAJ&amp;hl=fr">Dr. Salah Ghamizi</a>, <a href="https://scholar.google.com/citations?user=KcGsVdIAAAAJ&amp;hl=fr&amp;oi=ao">(to be Dr.) Mohamed Djilani</a>, <a href="https://mihaela-stoian.github.io/">(to be Dr.) Mihaela C. Stoian</a> and <a href="https://egiunchiglia.github.io/">Asst. Prof. Dr. Eleonora Giunchiglia</a>.</em></p> <p><em>If you want to dig deeper into the results or specific subtopics, check out the papers linked in each blog post.</em></p>]]></content><author><name></name></author><category term="research"/><category term="adversarial machine learning"/><category term="adversarial attacks"/><category term="AI/ML security"/><summary type="html"><![CDATA[Finding the attacks that teach models to defend themselves.]]></summary></entry><entry><title type="html">2b. Constrained Adversarial DGMs (C-AdvDGMs): Realistic Attacks with Generative Models</title><link href="https://salijona.github.io/blog/2025/tabB/" rel="alternate" type="text/html" title="2b. Constrained Adversarial DGMs (C-AdvDGMs): Realistic Attacks with Generative Models"/><published>2025-09-08T00:00:00+00:00</published><updated>2025-09-08T00:00:00+00:00</updated><id>https://salijona.github.io/blog/2025/tabB</id><content type="html" xml:base="https://salijona.github.io/blog/2025/tabB/"><![CDATA[<p>In our previous post, we introduced Constrained Deep Generative Models (C-DGMs), which were designed to generate tabular data that not only looks realistic but also respects the rules of the domain. While this was an important step toward producing trustworthy synthetic data, it naturally led to a new question: can these models be used to probe the weaknesses of tabular ML systems?</p> <p>In this post, we explore exactly that. By extending C-DGMs to generate adversarial examples, we arrive at Constrained Adversarial DGMs (C-AdvDGMs). By enforcing domain constraints, these examples remain valid and realistic, reflecting the types of inputs a model might encounter in practice and making the attacks practically relevant. This approach is described in our work <em><a href="https://arxiv.org/abs/2409.12642">Deep Generative Models as an Adversarial Attack Strategy for Tabular Machine Learning</a></em>, which presents the methods behind C-AdvDGMs.</p> <p><strong>Recap.</strong> Constrained Deep Generative Models (C-DGMs) integrate a Constraint Layer (CL) that enforces domain rules through a repair strategy. Given the constraints and feature ordering, the CL minimally adjusts any generated samples that violate the rules, ensuring they are valid while preserving the underlying data distribution. For example, it guarantees relationships like total_income = salary + bonus + other components are maintained.</p> <div class="row mt-3"> <div class="col-sm mt-3 mt-md-0 text-center"> <figure> <picture> <source class="responsive-img-srcset" srcset="/assets/img/series/cadvdgm-480.webp 480w,/assets/img/series/cadvdgm-800.webp 800w,/assets/img/series/cadvdgm-1400.webp 1400w," type="image/webp" sizes="95vw"/> <img src="/assets/img/series/cadvdgm.png" class="img-fluid rounded z-depth-1" width="70%" height="auto" data-zoomable="" loading="lazy" onerror="this.onerror=null; $('.responsive-img-srcset').remove();"/> </picture> </figure> </div> </div> <p>The figure above illustrates the overall framework of C-AdvDGMs. The main modifications from a standard DGM are highlighted by the red numbers:</p> <ol> <li> <p><strong>Constraint-Aware Generation from Initial Input.</strong> Instead of creating data from scratch, the generator takes an existing sample and applies small, targeted perturbations. The constraint layer ensures the output follows all domain rules, keeping samples valid and realistic.</p> </li> <li> <p><strong>Target Model Evaluation.</strong> In C-AdvDGMs, the generated examples are additionally tested on a target classifier to evaluate how effectively they fool the model, a step that is not present in standard DGMs.</p> </li> <li> <p><strong>Optimized Training.</strong> The initial C-AdvDGM loss is extended into a combined loss function that balances four objectives: preserving data realism, maximizing adversarial success, controlling perturbation size, and enforcing user-defined constraints.</p> </li> </ol> <p>To revisit our initial question, we wanted to see if C-AdvDGMs could expose weaknesses in tabular ML systems.</p> <p><strong>What we discovered:</strong> Across the four types we tested, performance varied quite a bit. Only one model managed a competitive adversarial success rate (ASR), and even it was often outperformed by gradient-based and search-based attacks, ranking second at best. What really stood out was the role of the Constraint Layer (CL). Including it during training or sampling consistently boosted success rates, showing just how important it is to enforce domain knowledge when generating realistic adversarial examples.</p> <p>C-AdvDGMs introduce a novel way to generate realistic adversarial examples by extending deep generative models with constraint-aware generation. While they do not always match traditional attacks in terms of raw success rates, they produce adversarial samples that are valid, plausible, and aligned with real-world domain constraints. At the same time, C-AdvDGMs represent just one path toward realistic adversarial attacks. Alternative approaches such as adapting gradient-based, gradient-free, or learning-based attacks to respect feasibility constraints remain promising directions for improving overall attack strength.</p> <p>By combining constraint-aware generation with advances in other adversarial techniques, researchers can build a more comprehensive toolkit for adversarial testing. This opens the door to more reliable robustness evaluations for tabular ML systems, particularly in high-stakes tabular domains like finance, healthcare, and security.</p> <hr/> <p><strong>Note:</strong> <em>This blog series is based on research about the realism of current adversarial attacks from my time at the SerVal group, SnT (University of Luxembourg). It’s an easy-to-digest format for anyone interested in the topic, especially those who may not have time (or willingness) to read our full papers.</em></p> <p><em>The work and results presented here are a team effort, including <a href="https://maxcordy.github.io/">Asst. Prof. Dr. Maxime Cordy</a>, <a href="https://scholar.google.com/citations?user=4RhGnOoAAAAJ&amp;hl=en&amp;oi=ao">Dr. Thibault Simonetto</a>, <a href="https://scholar.google.com/citations?user=UcvKgR0AAAAJ&amp;hl=fr">Dr. Salah Ghamizi</a>, <a href="https://scholar.google.com/citations?user=KcGsVdIAAAAJ&amp;hl=fr&amp;oi=ao">(to be Dr.) Mohamed Djilani</a>, <a href="https://mihaela-stoian.github.io/">(to be Dr.) Mihaela C. Stoian</a> and <a href="https://egiunchiglia.github.io/">Asst. Prof. Dr. Eleonora Giunchiglia</a>.</em></p> <p><em>If you want to dig deeper into the results or specific subtopics, check out the papers linked in each blog post.</em></p>]]></content><author><name></name></author><category term="research"/><category term="adversarial machine learning"/><category term="adversarial attacks"/><category term="AI/ML security"/><summary type="html"><![CDATA[Extending C-DGMs to Safely Test Model Vulnerabilities]]></summary></entry><entry><title type="html">2a. From Deep Generative Models (DGMs) to Constrained Deep Generative Models (C-DGMs)</title><link href="https://salijona.github.io/blog/2025/tabA/" rel="alternate" type="text/html" title="2a. From Deep Generative Models (DGMs) to Constrained Deep Generative Models (C-DGMs)"/><published>2025-09-07T00:00:00+00:00</published><updated>2025-09-07T00:00:00+00:00</updated><id>https://salijona.github.io/blog/2025/tabA</id><content type="html" xml:base="https://salijona.github.io/blog/2025/tabA/"><![CDATA[<p>In the last post, we explored why adversarial examples for tabular data must be realistic. A negative age, a bank account with inconsistent balances, or a medical record with incompatible diagnoses may succeed in bypassing a model, but they are meaningless in practice. They belong to a space of points that cannot exist, and as such they represent useless threats. Our goal is not to discover these impossible cases, but to identify the ones that truly matter. The realistic adversarial examples that expose vulnerabilities models will face in the real world.</p> <p>Deep Generative Models (DGMs) such as GANs, VAEs, and diffusion models seem like a natural candidate for this task. They’re powerful and efficient, capable of learning complex data distributions and generating synthetic data that closely resembles real samples. This makes them a practical option for producing adversarial examples at scale.</p> <p>But here lies the problem:</p> <blockquote> <p>Statistically plausible does not necessarily mean “feasible”.</p> </blockquote> <p>When we tested popular tabular DGMs on six real-world datasets, we ran into some challenges. A large portion of the generated samples (sometimes more than half) failed to meet even the most basic feasibility constraints. In some datasets, nearly every generated record was invalid, with violation rates reaching as high as 95 to 100%. In theory, you could try filtering out invalid outputs by repeatedly generating new ones until you get a valid sample. This technique is called rejection sampling, but it stops being practical if most samples are rejected.</p> <p>The problem is straightforward: a model that merely captures statistical plausibility is not enough. To be useful for adversarial testing, or even for generating synthetic data more broadly, we need generative models that are realistic by design. That means models that respect the rules of the domain, not after the fact through rejection sampling, but as an integral part of the generation process.</p> <h2 id="the-constraint-layer-adding-a-rulebook-to-deep-generative-models">The Constraint Layer: Adding a Rulebook to Deep Generative Models</h2> <div class="row mt-3"> <div class="col-sm mt-3 mt-md-0 text-center"> <figure> <picture> <source class="responsive-img-srcset" srcset="/assets/img/series/cdgm-480.webp 480w,/assets/img/series/cdgm-800.webp 800w,/assets/img/series/cdgm-1400.webp 1400w," type="image/webp" sizes="95vw"/> <img src="/assets/img/series/cdgm.png" class="img-fluid rounded z-depth-1" width="70%" height="auto" data-zoomable="" loading="lazy" onerror="this.onerror=null; $('.responsive-img-srcset').remove();"/> </picture> </figure> </div> </div> <p>Before DGMs can be used for adversarial testing, they must first produce data that makes sense. That is where the Constraint Layer (CL) comes in. Inspired by neuro-symbolic AI, the CL acts as a rulebook embedded inside the generator. Its job is simple but crucial: check each generated record against a set of user-defined constraints, and if any rules are violated, nudge the values just enough to bring the record back into the feasible region. The correction is always minimal, so the repaired record stays as close as possible to what the generator originally produced.</p> <p>Constraints can capture simple rules, like ensuring <code class="language-plaintext highlighter-rouge">age ≥ 0</code>, or more complex structural relationships, such as <code class="language-plaintext highlighter-rouge">total_income = salary + bonus + other</code>. By enforcing these user-defined linear constraints directly during generation, the CL ensures that every output respects the domain’s ground truths rather than producing “plausible but impossible” data.</p> <p>An important detail is the order in which features are repaired, which is also specified by the user. Since features often depend on one another, the CL processes them sequentially according to this ordering. The sequence can follow the feature indices, be randomized, or be guided by causal or logical relationships in the data. Choosing the order carefully helps the CL make minimal adjustments while preserving the integrity of the generator’s learned distribution.</p> <hr/> <h4 id="example-how-feature-ordering-matters">Example: How Feature Ordering Matters</h4> <p>Consider a dataset with three features: <code class="language-plaintext highlighter-rouge">salary</code>, <code class="language-plaintext highlighter-rouge">bonus</code>, and <code class="language-plaintext highlighter-rouge">total_income</code>, with the linear constraint <code class="language-plaintext highlighter-rouge">total_income = salary + bonus</code>.</p> <p>Suppose the generator produces a sample where: <code class="language-plaintext highlighter-rouge">salary = 50 ^ bonus = 20 ^ total_income = 60</code>. The constraint is violated because <code class="language-plaintext highlighter-rouge">50 + 20 ≠ 60</code>.</p> <p>The constraint layer repairs features sequentially based on the user-specified ordering:</p> <ul> <li> <p><strong>Order 1: salary → bonus → total_income</strong><br/> The CL first checks <code class="language-plaintext highlighter-rouge">salary (50)</code> and <code class="language-plaintext highlighter-rouge">bonus (20)</code>, then adjusts <code class="language-plaintext highlighter-rouge">total_income</code> to <code class="language-plaintext highlighter-rouge">70</code>.</p> </li> <li> <p><strong>Order 2: total_income → salary → bonus</strong><br/> The CL first adjusts <code class="language-plaintext highlighter-rouge">total_income</code> to <code class="language-plaintext highlighter-rouge">70</code>, then checks <code class="language-plaintext highlighter-rouge">salary</code> and <code class="language-plaintext highlighter-rouge">bonus</code> (both fine).</p> </li> </ul> <p>In this simple example, both orders produce valid outputs, but in complex datasets with interdependent features, the ordering affects which features are minimally changed and how closely the repaired sample matches the original generator output. Ordering based on causal or logical relationships helps preserve the generator’s intended distribution.</p> <p>Because the CL is differentiable, it can be integrated into the training phase, so the generator gradually learns to produce valid samples directly. It can also act as a guardrail at inference time, repairing invalid outputs even for pre-trained or black-box models.</p> <p>With this addition, ordinary DGMs become <strong>Constrained DGMs (C-DGMs)</strong>, generators that not only capture statistical patterns but also obey the rules of the real world. This foundation sets the stage for the next step: extending C-DGMs into adversarial generators capable of producing realistic, constraint-respecting attacks.</p> <hr/> <p>But before we go there, let’s look at what we observed.</p> <ul> <li><strong>Constraint violations.</strong> With the constraint layer in place, feasibility violations dropped to zero. Unlike standard DGMs, which often produced invalid or inconsistent tabular records, C-DGMs generate samples that consistently respect domain rules. This makes them suitable for adversarial testing.</li> </ul> <p>However, the benefits of constrained generation go beyond adversarial testing. By ensuring that generated data is valid and realistic, C-DGMs can support a variety of practical applications: they enable the creation of privacy-preserving synthetic datasets, facilitate fairness auditing through plausible counterfactuals, provide useful data augmentation for small or imbalanced datasets, and generate reliable test cases for validating machine learning systems in safety-critical domains such as healthcare and finance.</p> <ul> <li> <p><strong>Utility.</strong> As a side experiment, to prove the benefits of C-DGMs beyond adversarial testing and to evaluate the overall quality of the synthetic data, we trained downstream classifiers on the generated samples. Models trained on constrained data outperformed those trained on unconstrained samples by up to 6.5% on utility metrics, demonstrating that the data is not only valid but also informative.</p> </li> <li> <p><strong>Runtime.</strong> Remarkably, these improvements came at minimal computational cost. Generating 1,000 samples with the constraint layer added only a few hundredths of a second, indicating that constrained generation can scale efficiently to larger datasets.</p> </li> </ul> <p>These results, along with additional findings and more detailed explanations of the construction of C-DGMs, are described further in <em><a href="https://arxiv.org/abs/2402.04823">How Realistic is Your Synthetic Data? Constraining Deep Generative Models for Tabular Data</a></em>.</p> <p>Now with the foundation of C-DGMs in place, the next step is to explore adversarial generation. If C-DGMs can reliably generate valid samples, can they also generate adversarial ones that are both realistic and effective? That’s the challenge we’ll tackle in the next post.</p> <hr/> <p><strong>Note:</strong> <em>This blog series is based on research about the realism of current adversarial attacks from my time at the SerVal group, SnT (University of Luxembourg). It’s an easy-to-digest format for anyone interested in the topic, especially those who may not have time (or willingness) to read our full papers.</em></p> <p><em>The work and results presented here are a team effort, including <a href="https://maxcordy.github.io/">Asst. Prof. Dr. Maxime Cordy</a>, <a href="https://scholar.google.com/citations?user=4RhGnOoAAAAJ&amp;hl=en&amp;oi=ao">Dr. Thibault Simonetto</a>, <a href="https://scholar.google.com/citations?user=UcvKgR0AAAAJ&amp;hl=fr">Dr. Salah Ghamizi</a>, <a href="https://scholar.google.com/citations?user=KcGsVdIAAAAJ&amp;hl=fr&amp;oi=ao">(to be Dr.) Mohamed Djilani</a>, <a href="https://mihaela-stoian.github.io/">(to be Dr.) Mihaela C. Stoian</a> and <a href="https://egiunchiglia.github.io/">Asst. Prof. Dr. Eleonora Giunchiglia</a>.</em></p> <p><em>If you want to dig deeper into the results or specific subtopics, check out the papers linked in each blog post.</em></p>]]></content><author><name></name></author><category term="research"/><category term="adversarial machine learning"/><category term="adversarial attacks"/><category term="AI/ML security"/><summary type="html"><![CDATA[How to Make Synthetic Tabular Data Realistic by Design]]></summary></entry><entry><title type="html">2. Realistic Adversarial Attacks for Tabular Data Using Generative Models</title><link href="https://salijona.github.io/blog/2025/tabular/" rel="alternate" type="text/html" title="2. Realistic Adversarial Attacks for Tabular Data Using Generative Models"/><published>2025-09-06T00:00:00+00:00</published><updated>2025-09-06T00:00:00+00:00</updated><id>https://salijona.github.io/blog/2025/tabular</id><content type="html" xml:base="https://salijona.github.io/blog/2025/tabular/"><![CDATA[<p>In our previous posts, we highlighted how adversarial attacks designed in controlled environments often fail to reflect real-world scenarios. So far, we have focused on images and text. In this post we will move to tabular data, allegedly one of the most widely used formats in practice, powering critical systems such as financial decision-making, medical diagnoses, and automated risk assessments. Tabular AI/ML applications are equally vulnerable to adversarial attacks. Here, we will explore how to construct adversarial attacks specifically for tabular data, with a focus on maintaining realism and practical relevance.</p> <p>Consider a credit card fraud detection system that processes records like this:</p> <table border="1"> <caption><strong>Original Transaction (Labelled as Fradulent)</strong></caption> <tr> <th>Age</th> <th>Income</th> <th>Transaction Amount</th> <th>Account Type</th> </tr> <tr> <td>35</td> <td>4000</td> <td>500</td> <td>Premium</td> </tr> </table> <p>This is a normal transaction that the system flags as suspicious. A naive attacker might think they can bypass the system simply by changing a single value. For example, they could inflate the transaction amount to an absurd number:</p> <p></p> <table border="1" style="border-collapse: collapse;"> <caption><strong>Adversarial Transaction (Labelled as Normal)</strong></caption> <tr> <th>Age</th> <th>Income</th> <th>Transaction Amount</th> <th>Account Type</th> </tr> <tr> <td>35</td> <td>4000</td> <td style="color:red">999,999,999</td> <td>Premium</td> </tr> </table> <p>Technically, the database accepts it, and it might fool an AI/ML model. But in reality, such an extreme number would immediately raise red flags: auditors, internal checks, or sanity rules would catch it instantly. This simple example shows that adversarial attacks on tabular ML models must respect constraints that make them plausible in the real world. We can identify three such constraints:</p> <ul> <li> <p><strong>Mutability Constraints</strong><br/> Certain features, such as blood type or date of birth, cannot be altered.</p> </li> <li> <p><strong>Structural Constraints</strong><br/> Tabular features have predefined domains. For example, age is restricted to integers between 0–120, and categorical variables can only take on a fixed set of values.</p> </li> <li> <p><strong>Inter-feature Dependencies</strong><br/> Features often have logical or statistical relationships. For instance, LoanAmount should not exceed a reasonable percentage of Income. These dependencies must be preserved.</p> </li> </ul> <p>Violating any of these constraints produces unrealistic or easily detected adversarial examples. Traditional adversarial attacks, which work well for images, often fail when applied in tabular settings because they do not account for mutability, structural limits, or inter-feature dependencies<sup>[1]</sup>. As a result, these methods frequently generate invalid or implausible records.</p> <p>Therefore, we need new adversarial approaches that can bypass machine learning models and at the same time respecting the inherent constraints of real-world tabular data. By ensuring that adversarial examples remain plausible and stealthy, these methods can more accurately simulate attacks that might occur in practice.</p> <p>We present below the main steps of our approach, and in the next two posts we will discuss them more in-depth.</p> <h2 id="our-approach-step-by-step">Our Approach: Step by Step</h2> <p>Building realistic adversarial attacks for tabular data can be approached in multiple ways. One option, which is the most generalizable, is to adapt existing image-based methods (e.g gradient-based, gradient-free, or learning-based attacks) by incorporating the feasibility constraints discussed earlier. This process involves masking immutable features, keeping values within valid ranges through rounding, for example, and applying post-hoc repair operations to maintain inter-feature dependencies. The second option is to develop entirely new techniques tailored to a specific use case, such as fraud detection. While potentially more effective for a single domain, this approach is difficult to generalize to other applications without significant effort.</p> <p>We opted for the first approach, combining generative models with feasibility constraints enforced through post-hoc repair. Generative models are particularly appealing because they are far more efficient than iterative optimization methods. Once trained, they can produce adversarial examples in a single step. Post-hoc repair ensures that all generated outputs satisfy the necessary constraints, providing guarantees that constraint-aware optimization alone may not offer.</p> <p>There are two key steps that we followed to build an adversarial attack for tabular ML which generates feasible input that are closer to a real-world scenario.</p> <ul> <li><strong>Step 1: Converting Deep Generative Models (DGMs) into Constrained DGMs (C-DGMs)</strong></li> </ul> <p>The first step is to ensure that generative models produce valid tabular data. To achieve this, we designed a differentiable constraint layer that performs post-hoc repair to correct outputs violating domain constraints, such as logical relationships between features (e.g., total_income = salary + bonus + other). This layer works as a filter that catches mistakes and fixes them. This results in a model capable of generating realistic tabular samples that conform to all feasibility requirements. This method is discussed in detail in our work <em><a href="https://arxiv.org/abs/2402.04823">How Realistic is Your Synthetic Data? Constraining Deep Generative Models for Tabular Data</a></em>.</p> <ul> <li><strong>Step 2: Converting C-DGMs into Adversarial C-DGMs (C-AdvDGMs)</strong></li> </ul> <p>Once the constrained generative model reliably produces valid samples, we adapt it to generate adversarial examples that can mislead machine learning models. This is achieved through the incorporation of an adversarial loss and architectural modifications. This approach is described further in <em><a href="https://arxiv.org/abs/2409.12642">Deep Generative Models as an Adversarial Attack Strategy for Tabular Machine Learning</a></em>.</p> <p>In the next posts, we will take a closer look at these two steps. First, in Step 1, we will show how deep generative models (DGMs) can be transformed into constrained generative models (C-DGMs) that produce valid, realistic tabular samples. We will explain the design of the differentiable constraint layer that ensures all domain constraints are satisfied.</p> <p>Following that, in Step 2, we will demonstrate how (C-DGMs) can be extended to C-AdvDGMs to generate adversarial examples capable of bypassing machine learning models. We will explore the incorporation of adversarial loss and architectural modifications.</p> <h2 id="1-ghamizi-et-al-search-based-adversarial-testing-and-improvement-of-constrained-credit-scoring-systems-fse-2020"><small>1. <a href="https://arxiv.org/abs/1708.06131">Ghamizi et al., “Search-based adversarial testing and improvement of constrained credit scoring systems.”, FSE 2020</a></small></h2> <p><strong>Note:</strong> <em>This blog series is based on research about the realism of current adversarial attacks from my time at the SerVal group, SnT (University of Luxembourg). It’s an easy-to-digest format for anyone interested in the topic, especially those who may not have time (or willingness) to read our full papers.</em></p> <p><em>The work and results presented here are a team effort, including <a href="https://maxcordy.github.io/">Asst. Prof. Dr. Maxime Cordy</a>, <a href="https://scholar.google.com/citations?user=4RhGnOoAAAAJ&amp;hl=en&amp;oi=ao">Dr. Thibault Simonetto</a>, <a href="https://scholar.google.com/citations?user=UcvKgR0AAAAJ&amp;hl=fr">Dr. Salah Ghamizi</a>, <a href="https://scholar.google.com/citations?user=KcGsVdIAAAAJ&amp;hl=fr&amp;oi=ao">(to be Dr.) Mohamed Djilani</a>, <a href="https://mihaela-stoian.github.io/">(to be Dr.) Mihaela C. Stoian</a> and <a href="https://egiunchiglia.github.io/">Asst. Prof. Dr. Eleonora Giunchiglia</a>.</em></p> <p><em>If you want to dig deeper into the results or specific subtopics, check out the papers linked in each blog post.</em></p>]]></content><author><name></name></author><category term="research"/><category term="adversarial machine learning"/><category term="adversarial attacks"/><category term="AI/ML security"/><summary type="html"><![CDATA[In our previous posts, we highlighted how adversarial attacks designed in controlled environments often fail to reflect real-world scenarios. So far, we have focused on images and text. In this post we will move to tabular data, allegedly one of the most widely used formats in practice, powering critical systems such as financial decision-making, medical diagnoses, and automated risk assessments. Tabular AI/ML applications are equally vulnerable to adversarial attacks. Here, we will explore how to construct adversarial attacks specifically for tabular data, with a focus on maintaining realism and practical relevance.]]></summary></entry><entry><title type="html">1. The Limits of Adversarial Text Attacks</title><link href="https://salijona.github.io/blog/2025/nlp/" rel="alternate" type="text/html" title="1. The Limits of Adversarial Text Attacks"/><published>2025-09-05T00:00:00+00:00</published><updated>2025-09-05T00:00:00+00:00</updated><id>https://salijona.github.io/blog/2025/nlp</id><content type="html" xml:base="https://salijona.github.io/blog/2025/nlp/"><![CDATA[<p>In the first post of this series, we introduced adversarial attacks as a security threat to AI/ML systems. We also discussed why realism matters when evaluating and defending against them. Yet defining and reproducing “realistic” conditions is already difficult for many applications. In this post, we’re zooming in on natural language processing (NLP) to see why these challenges are even harder when the medium is language.</p> <p>For image-based adversarial attacks that we have seen so far, realism is often defined by imperceptibility. Mathematically, this is captured by minimizing the distance between the original and adversarial image using L<sub>p</sub> norms. For example, the L<sub>1</sub> norm sums up all the small differences in pixel values compared to the original image. Smaller distances mean the images look almost identical to the human eye. The goal is to make changes so subtle that people don’t notice them, while still fooling the model.</p> <p>With text, however, things are much trickier. A tiny change, such as swapping “<em>movie</em>” for “<em>mov1e</em>” might deceive a classifier, but it is immediately obvious to any human reader. This disconnect matters because, in many NLP applications, humans remain part of the decision-making loop. A phishing email with awkward phrasing probably won’t get clicked, even if a sophisticated AI/ML filter fails to catch it. A fake news headline that “feels off” will raise suspicion, even if it bypasses automated detection. Offensive language that appears altered won’t convince moderators, even if the model is fooled. In these scenarios, an attack is only truly dangerous if it can deceive both algorithms and humans. This means that creating a realistic and effective adversarial example requires thinking about how humans interpret text, not just how models process it.</p> <div class="row mt-3"> <div class="col-sm mt-3 mt-md-0 text-center"> <figure> <picture> <source class="responsive-img-srcset" srcset="/assets/img/series/text_spectrum-480.webp 480w,/assets/img/series/text_spectrum-800.webp 800w,/assets/img/series/text_spectrum-1400.webp 1400w," type="image/webp" sizes="95vw"/> <img src="/assets/img/series/text_spectrum.png" class="img-fluid rounded z-depth-1" width="80%" height="auto" data-zoomable="" loading="lazy" onerror="this.onerror=null; $('.responsive-img-srcset').remove();"/> </picture> </figure> </div> </div> <p>To understand realism for text attacks, it helps to see it as a spectrum. At one end are unrealistic attacks that are easy for humans to detect, but may still confuse automated models. In the middle are somewhat realistic attacks that sound plausible but still raise suspicion. At the far end are highly realistic attacks designed to deceive both humans and AI/ML systems.</p> <blockquote> <p>Attack realism in text-based use cases, can be viewed as a spectrum.</p> </blockquote> <p>To illustrate, consider the phishing examples in the figure above:</p> <ul> <li> <p><strong>Unrealistic (toy attack):</strong><br/> “<em>You lottery got…!! Links wkor ///</em>”<br/> These attacks are nonsensical and grammatically broken. Humans would easily dismiss them, but some detection models might still misclassify them.</p> </li> <li> <p><strong>Somewhat realistic (model fooled, humans suspicious):</strong><br/> “<em>You have win the lottery. Click here claim your prize.</em>”<br/> The message is understandable but clunky and unpolished. Many automated filters might fail to flag it, yet most users would still hesitate to trust it.</p> </li> <li> <p><strong>Highly realistic (true threat):</strong><br/> “<em>You have won the lottery. Click this link to get your money.</em>”<br/> This represents a serious security risk. The message is fluent, grammatically correct, semantically coherent, and persuasive enough to bypass both detection systems and human judgment.</p> </li> </ul> <p>Real attackers aim for highly realistic adversarial text to maximize success while avoiding detection. Consequently, most NLP robustness tests try to preserve meaning, grammar, and natural style so the attacks resemble real-world scenarios. However, these methods often rely on mathematical proxies that miss the subtle cues humans use to judge whether a message is suspicious. Our survey of the literature shows that human perception is rarely included in evaluations: 3 of 16 studies involved no human participants, and those that did often rely on just a handful of people (1–3) assessing narrow aspects like meaning preservation or label consistency. Such limited checks overlook the broader ways humans detect suspicious text.</p> <p>To address this, we conducted one of the first large-scale studies on human perception of adversarial text, surveying 378 participants across nine state-of-the-art attack methods to see how people actually respond. We focused on two key aspects of how humans perceived the adversarial texts:</p> <ul> <li> <p><strong>Validity:</strong> Does the text preserve its original intent after being manipulated?<br/> For example, if a hateful message like “I hate all XXX” is changed to “I love XXX,” the model might be fooled, but the attacker’s goal fails because the meaning that reaches the end user has been completely reversed.</p> </li> <li> <p><strong>Naturalness:</strong> Does the text appear manipulated or computer-generated to a human reader?<br/> Even if an adversarial text is valid, one that feels awkward, unnatural, or obviously altered may fail to convince people.</p> </li> </ul> <p>The results showed that what fools models often does not fool humans. We explore these findings and their implications in our ACL paper, “<em><a href="https://aclanthology.org/2023.acl-long.491.pdf">How Do Humans Perceive Adversarial Text? A Reality Check on the Validity and Naturalness of Word-Based Adversarial Attacks</a></em>”.</p> <ul> <li> <p><strong>Validity:</strong> Humans correctly understood the original intent of about 72% of adversarial texts, compared to nearly 89% for the original texts. This shows that many attacks produce a significant portion of invalid adversarial examples.</p> </li> <li> <p><strong>Naturalness:</strong> Adversarial texts also stood out as unnatural. Over 60% of participants flagged them as likely computer-generated, compared to just 21% for the original texts. When asked to pinpoint the changes, participants identified the altered words in roughly 50% of the cases. This shows that while adversarial examples may fool models, they often fail the human “readability and believability” test.</p> </li> </ul> <p>These results show that even the most advanced attacks today often wouldn’t succeed in real-world settings where humans are part of the system. This is relevant for cases like content moderation, or misinformation control, where human judgment remains a critical part of the system, as we discussed in the introduction.</p> <p>Out of curiosity, we also explored why certain texts trigger human suspicion. From there, we could observe the following trends:</p> <ul> <li><strong>Clear meaning matters:</strong> Texts that preserved their original intent and were easy to understand were generally seen as more natural, while messages with unclear or distorted meaning were much more likely to be flagged as “computer-generated.”</li> <li><strong>Grammar errors, not as much:</strong> Minor grammar mistakes didn’t necessarily make a text feel unnatural if the meaning was clear. But once a message became awkward or nonsensical, it immediately stood out to readers.</li> </ul> <p>These were the main results, and for full details you can check out our paper. Few were the main lessons, from this large-scale human study. It became clear that human psychology plays a major role in whether an attack succeeds. Focusing only on model performance misses an important point: human judgment gives a more realistic perspective for many applications. Future research on adversarial testing in NLP should focus on crafting examples that are semantically valid, natural, and persuasive, while keeping humans in the loop to accurately assess real-world threat potential.</p> <p><em>A small disclaimer</em>: Our study predates the recent surge in Large Language Models (LLMs). These systems generate fluent, convincing text that may appear far less suspicious, posing new challenges for adversarial NLP research.</p> <hr/> <p><strong>Note:</strong> <em>This blog series is based on research about the realism of current adversarial attacks from my time at the SerVal group, SnT (University of Luxembourg). It’s an easy-to-digest format for anyone interested in the topic, especially those who may not have time (or willingness) to read our full papers.</em></p> <p><em>The work and results presented here are a team effort, including <a href="https://maxcordy.github.io/">Asst. Prof. Dr. Maxime Cordy</a>, <a href="https://scholar.google.com/citations?user=4RhGnOoAAAAJ&amp;hl=en&amp;oi=ao">Dr. Thibault Simonetto</a>, <a href="https://scholar.google.com/citations?user=UcvKgR0AAAAJ&amp;hl=fr">Dr. Salah Ghamizi</a>, <a href="https://scholar.google.com/citations?user=KcGsVdIAAAAJ&amp;hl=fr&amp;oi=ao">(to be Dr.) Mohamed Djilani</a>, <a href="https://mihaela-stoian.github.io/">(to be Dr.) Mihaela C. Stoian</a> and <a href="https://egiunchiglia.github.io/">Asst. Prof. Dr. Eleonora Giunchiglia</a>.</em></p> <p><em>If you want to dig deeper into the results or specific subtopics, check out the papers linked in each blog post.</em></p>]]></content><author><name></name></author><category term="research"/><category term="adversarial machine learning"/><category term="adversarial attacks"/><category term="AI/ML security"/><summary type="html"><![CDATA[When AI Gets Fooled but Humans Don’t.]]></summary></entry><entry><title type="html">0. AI/ML Security Is Broken Without Realistic Adversarial Testing</title><link href="https://salijona.github.io/blog/2025/intro/" rel="alternate" type="text/html" title="0. AI/ML Security Is Broken Without Realistic Adversarial Testing"/><published>2025-09-04T00:00:00+00:00</published><updated>2025-09-04T00:00:00+00:00</updated><id>https://salijona.github.io/blog/2025/intro</id><content type="html" xml:base="https://salijona.github.io/blog/2025/intro/"><![CDATA[<p>Imagine testing the strength of a castle’s defensive walls with cardboard weapons. It sounds absurd, but this is often how adversarial testing in AI/ML is carried out today.</p> <p>Now, instead of a castle, imagine social media platforms. They rely on AI/ML to filter harmful content such as violence, abuse, or nudity before it reaches your screen. But what happens if someone slightly alters a harmful image so the AI/ML cannot detect it, even though a human would clearly see the problem? That is the growing challenge of adversarial attacks.</p> <p>An <strong>adversarial attack</strong> is a deliberately crafted input that deceives a machine learning model without fooling a human. To us, the image appears unchanged. To the model, it’s something entirely different. This happens because machine learning models don’t “see” the way we do. Instead of high-level conceptual features (like a face or the texture of an object), they rely on fragile mathematical patterns (such as pixel correlations), which can fail when exposed to the right perturbations.</p> <div class="row mt-3"> <div class="col-sm mt-3 mt-md-0 text-center"> <figure> <picture> <source class="responsive-img-srcset" srcset="/assets/img/series/lab_attack-480.webp 480w,/assets/img/series/lab_attack-800.webp 800w,/assets/img/series/lab_attack-1400.webp 1400w," type="image/webp" sizes="95vw"/> <img src="/assets/img/series/lab_attack.png" class="img-fluid rounded z-depth-1" width="50%" height="auto" data-zoomable="" loading="lazy" onerror="this.onerror=null; $('.responsive-img-srcset').remove();"/> </picture> </figure> </div> </div> <p>It is important to note that the key word here is “<em>right</em>”. Not any random manipulation causes a model to fail; while deployed models are not perfect, they are strong enough that creating a successful adversarial example usually requires a carefully crafted input, often discovered through a time-consuming search process. In most cases, it’s not something that can be done casually or instantly.</p> <p>The first clear demonstrations of adversarial attacks came in 2014 <sup>[1,2]</sup>, when researchers showed that tiny, nearly imperceptible changes to images could cause deep neural networks to misclassify them. Since then, adversarial attacks have expanded to text, malware, financial transactions, and many other types of data. In practice, these attacks can have serious consequences: they allow malware to bypass antivirus engines, financial fraudsters to evade detection, and self-driving cars to misread traffic signs. A clear and present digital security threat!</p> <p>The rise of these attacks (and others on AI/ML systems) has not gone unnoticed. Entire companies now exist solely to secure them. Take HiddenLayer <sup>[3]</sup>, for example, a company founded by people whose firsthand experience with such attacks at an antivirus provider motivated them to develop defenses. Their strategy, like many others in the field, begins with adversarial testing, known in cybersecurity circles as “red-teaming.” This approach involves attacking your own models before anyone else can, uncovering weaknesses early and assessing the risks these systems might face.</p> <p>But here’s the catch:</p> <blockquote> <p>Most adversarial testing today is disconnected from the real world.</p> </blockquote> <p>Researchers and engineers spend hours at their computers, crafting mathematically precise tweaks, small pixel changes in an image or character swaps in text. Easy to create and measure, yes, but far from the messy and creative tactics real attackers use.</p> <p>Real-world adversaries think differently from controlled lab experiments. Their priorities are:</p> <ul> <li> <p><strong>Results, not perfection.</strong> Tiny, elegant pixel tweaks or awkward emojis over an image, the choice does not matter. They care about whatever fools both the AI and any humans monitoring it.</p> </li> <li> <p><strong>Function above all.</strong> Every attack must still work in practice: transactions must process, malware must execute, sentences must make sense.</p> </li> <li> <p><strong>The full system.</strong> Attackers do not stop at the model. They probe user behavior, business logic, and human oversight, exploiting whichever link breaks first.</p> </li> </ul> <div class="row mt-3"> <div class="col-sm mt-3 mt-md-0 text-center"> <figure> <picture> <source class="responsive-img-srcset" srcset="/assets/img/series/real_attack-480.webp 480w,/assets/img/series/real_attack-800.webp 800w,/assets/img/series/real_attack-1400.webp 1400w," type="image/webp" sizes="95vw"/> <img src="/assets/img/series/real_attack.png" class="img-fluid rounded z-depth-1" width="70%" height="auto" data-zoomable="" loading="lazy" onerror="this.onerror=null; $('.responsive-img-srcset').remove();"/> </picture> </figure> </div> </div> <p>When adversarial testing ignores real-world attacks, it is like testing a castle’s walls with cardboard weapons. The walls may seem strong, but real threats go unchecked. The result is a false sense of security: AI systems that survive controlled tests may still fail against actual adversaries. That is why every defense must start with realism. Only by reflecting how attackers truly behave can we prepare models for the threats they will face in practice.</p> <p>Realistic testing recreates practical conditions. It is not about making the process harder for researchers and AI/ML Security practitioners; it is about preparing for genuine risks rather than idealized scenarios. Security tests that ignore real adversary behavior are not just incomplete, they can be misleading.</p> <p>This blog series is dedicated to closing the realism gap in adversarial testing and defense. Just as a castle cannot rely on cardboard weapons to prove its strength, AI systems cannot rely on idealized tests to ensure security. In the coming posts, we will explore how realism plays out across different domains, from financial fraud to malware detection, and why it is important not only for finding vulnerabilities but also for building resilient defenses that can withstand real-world adversaries.</p> <p><small>1. <a href="https://arxiv.org/abs/1708.06131">Biggio et al., <em>Evasion Attacks against Machine Learning at Test Time</em>, ECML 2013</a></small></p> <p><small>2. <a href="https://arxiv.org/abs/1312.6199">Szegedy et al., <em>Intriguing properties of neural networks</em>, ICLR 2014</a></small></p> <p><small>3. <a href="https://hiddenlayer.com/company/">HiddenLayer Company</a></small></p> <hr/> <p><strong>Note:</strong> <em>This blog series is based on research about the realism of current adversarial attacks from my time at the SerVal group, SnT (University of Luxembourg). It’s an easy-to-digest format for anyone interested in the topic, especially those who may not have time (or willingness) to read our full papers.</em></p> <p><em>The work and results presented here are a team effort, including <a href="https://maxcordy.github.io/">Asst. Prof. Dr. Maxime Cordy</a>, <a href="https://scholar.google.com/citations?user=4RhGnOoAAAAJ&amp;hl=en&amp;oi=ao">Dr. Thibault Simonetto</a>, <a href="https://scholar.google.com/citations?user=UcvKgR0AAAAJ&amp;hl=fr">Dr. Salah Ghamizi</a>, <a href="https://scholar.google.com/citations?user=KcGsVdIAAAAJ&amp;hl=fr&amp;oi=ao">(to be Dr.) Mohamed Djilani</a>, <a href="https://mihaela-stoian.github.io/">(to be Dr.) Mihaela C. Stoian</a> and <a href="https://egiunchiglia.github.io/">Asst. Prof. Dr. Eleonora Giunchiglia</a>.</em></p> <p><em>If you want to dig deeper into the results or specific subtopics, check out the papers linked in each blog post.</em></p>]]></content><author><name></name></author><category term="research"/><category term="adversarial machine learning"/><category term="adversarial attacks"/><category term="AI/ML security"/><summary type="html"><![CDATA[You can’t secure a castle by testing it with cardboard swords.]]></summary></entry><entry><title type="html">Tell me a story #2 - Reflections After Five Years in Academia</title><link href="https://salijona.github.io/blog/2025/tell-me-a-story-2-reflections-after-five-years-in-academia/" rel="alternate" type="text/html" title="Tell me a story #2 - Reflections After Five Years in Academia"/><published>2025-08-01T00:00:00+00:00</published><updated>2025-08-01T00:00:00+00:00</updated><id>https://salijona.github.io/blog/2025/tell-me-a-story-2---reflections-after-five-years-in-academia</id><content type="html" xml:base="https://salijona.github.io/blog/2025/tell-me-a-story-2-reflections-after-five-years-in-academia/"><![CDATA[]]></content><author><name></name></author><summary type="html"><![CDATA[What I’d Tell Anyone Considering a PhD]]></summary></entry><entry><title type="html">The Forgotten Domain: Adversarial Machine Learning for Tabular Data</title><link href="https://salijona.github.io/blog/2025/slr/" rel="alternate" type="text/html" title="The Forgotten Domain: Adversarial Machine Learning for Tabular Data"/><published>2025-07-31T00:00:00+00:00</published><updated>2025-07-31T00:00:00+00:00</updated><id>https://salijona.github.io/blog/2025/slr</id><content type="html" xml:base="https://salijona.github.io/blog/2025/slr/"><![CDATA[<p>Machine learning is now embedded in some of the highest-stakes decision systems: credit approvals, fraud detection, cybersecurity alerts, and even medical diagnoses. And what powers many of these systems behind the scenes? Not images or text but rows and columns. Spreadsheets. Tabular data.</p> <p>Yet when it comes to AI security, especially in the context of adversarial machine learning, tabular models have been overlooked. While the security of vision and NLP models get the headlines, the models most often deployed in industry (decision trees, gradient-boosted models, tabular neural networks) get far less attention when it comes to adversarial threats.</p> <p>That gap matters. Because if we want trustworthy AI, we can’t ignore the security risks in the systems we actually use.</p> <p>To better understand this overlooked domain, we conducted the first systematic literature review (SLR) focused entirely on adversarial attacks against tabular machine learning. Our paper, <strong>“Insights on Adversarial Attacks for Tabular Machine Learning via a Systematic Literature Review”</strong>, is now available on <a href="https://arxiv.org/abs/2506.15506">arXiv</a>.</p> <p>We analyzed <strong>53 papers</strong> published <strong>between 2018 and early 2025</strong> to answer three main questions:</p> <ul> <li>What does the research landscape look like?</li> <li>How are these attacks constructed?</li> <li>Do they actually work under real-world constraints?</li> </ul> <h2 id="1-a-niche-field-fragmented-and-domain-heavy">1. A Niche Field, Fragmented and Domain-Heavy</h2> <p>Interest in adversarial attacks on tabular ML models grew steadily from 2018 until around 2021, but has since stagnated. The field is still small and fragmented: the 53 papers we found are spread across 46 different venues, with little overlap.</p> <div class="row mt-3"> <div class="col-sm mt-3 mt-md-0 text-center"> <figure> <picture> <source class="responsive-img-srcset" srcset="/assets/img/slr/rq1-480.webp 480w,/assets/img/slr/rq1-800.webp 800w,/assets/img/slr/rq1-1400.webp 1400w," type="image/webp" sizes="95vw"/> <img src="/assets/img/slr/rq1.jpg" class="img-fluid rounded z-depth-1" width="70%" height="auto" data-zoomable="" loading="lazy" onerror="this.onerror=null; $('.responsive-img-srcset').remove();"/> </picture> </figure> </div> </div> <p>About half of the research proposes general-purpose attacks, while the rest focuses on specific domains. Cybersecurity dominates the field, perhaps unsurprisingly, given the naturally adversarial environment and the higher risk of attacks. Finance comes next, with a few papers tackling credit scoring and fraud detection.</p> <p>But overall, this is still a fragmented frontier with no central community.</p> <h2 id="2-attack-design-many-techniques-few-standards">2. Attack Design: Many Techniques, Few Standards</h2> <p>We looked at 61 unique attacks proposed in the reviewed papers and found both clear patterns and notable gaps.</p> <div class="row mt-3"> <div class="col-sm mt-3 mt-md-0 text-center"> <figure> <picture> <source class="responsive-img-srcset" srcset="/assets/img/slr/rq2-480.webp 480w,/assets/img/slr/rq2-800.webp 800w,/assets/img/slr/rq2-1400.webp 1400w," type="image/webp" sizes="95vw"/> <img src="/assets/img/slr/rq2.png" class="img-fluid rounded z-depth-1" width="70%" height="auto" data-zoomable="" loading="lazy" onerror="this.onerror=null; $('.responsive-img-srcset').remove();"/> </picture> </figure> </div> </div> <p>Most attacks target classification problems, especially binary classification, even though many real-world tabular applications (like pricing or forecasting) involve regression or multi-class outputs.Interestingly, about half the attacks assume black-box access. That’s a good sign: it reflects more realistic threat scenarios. In terms of design, most attacks can be grouped into four high-level strategies:</p> <ul> <li><strong>Gradient-based</strong>: Mostly borrowed from computer vision attacks (e.g., PGD, C&amp;W) but adapted for tabular constraints.</li> <li><strong>Gradient-free</strong>: Include rule-based methods, evolutionary search, and other heuristics. These are flexible but often inconsistent.</li> <li><strong>Learning-based</strong>: Often built with GANs, especially in cybersecurity contexts. But many of these reinvent the wheel and rarely compare to prior work.</li> <li><strong>Hybrid</strong>: Combine strategies, e.g., switching from gradient optimization to search heuristics. Still rare, but promising.</li> </ul> <p>One persistent issue is low reproducibility: only about one-third of the attacks provide public code. This lack of openness makes it difficult to compare methods fairly and slows down progress in the field.</p> <h2 id="3-do-these-attacks-work-in-the-real-world">3. Do These Attacks Work in the Real World?</h2> <p>It’s one thing to demonstrate an attack in a benchmark setting. It’s another to successfully execute that attack in real-world environments where inputs are constrained, systems are monitored, and decisions often reviewed by humans. We evaluated each paper against eight practical criteria measuring not just success, but real-world viability.</p> <div class="row mt-3"> <div class="col-sm mt-3 mt-md-0 text-center"> <figure> <picture> <source class="responsive-img-srcset" srcset="/assets/img/slr/rq3-480.webp 480w,/assets/img/slr/rq3-800.webp 800w,/assets/img/slr/rq3-1400.webp 1400w," type="image/webp" sizes="95vw"/> <img src="/assets/img/slr/rq3.jpg" class="img-fluid rounded z-depth-1" width="70%" height="auto" data-zoomable="" loading="lazy" onerror="this.onerror=null; $('.responsive-img-srcset').remove();"/> </picture> </figure> </div> </div> <ul> <li><strong>Efficacy</strong>: All papers measure this, usually via attack success rate or accuracy drop. But success on clean benchmarks doesn’t guarantee usefulness in live systems.</li> <li><strong>Efficiency</strong>: Very few papers report runtime or resource costs. Yet many attacks (especially heuristic ones) could be too slow to be practical.</li> <li><strong>Transferability</strong>: Most attacks target a specific model. Few check if adversarial examples work across architectures, which is key in black-box settings.</li> <li><strong>Feasibility</strong>: Some attacks impose practical constraints (e.g., value ranges or valid encodings), but many assume idealized settings, ignoring feature accessibility, feature dependencies, or domain-specific rules.</li> <li><strong>Semantic Preservation</strong>: Does the modified input still make sense? A technically valid change (e.g., flipping “employed” to “unemployed”) may pass unnoticed by a model, but could violate the underlying meaning or ground truth of the example.</li> <li><strong>Plausibility</strong>: Would a human reviewing the input find it believable? In computer vision this is important, but only a few studies on tabular ML check for it. Some even argue plausibility may not be relevant for tabular attacks, reflecting an ongoing debate in the field.</li> <li><strong>Defense Awareness</strong>: Attacks are often tested on unprotected models. In reality, defenses like input validation, adversarial training, and monitoring are common.</li> <li><strong>Dataset Suitability</strong>: Too many studies rely on small, outdated academic datasets (like Iris or Wine) that don’t reflect real-world complexity or risk.</li> </ul> <p>Most papers addressed efficacy, and some considered feasibility. But beyond those, few went further. Most studies covered just two to six of the eight practical criteria, with four being the most common.</p> <h2 id="what-we-learned">What We Learned</h2> <p>Adversarial attacks on tabular models aren’t just academic exercises. In fields like finance, healthcare, and cybersecurity, these vulnerabilities can have real-world consequences. And yet, the field remains immature.</p> <p>We found innovative techniques tested only in idealized settings, with limited practical relevance. Many papers measure success as a drop in model accuracy, but rarely ask deeper questions: Is the attack realistic? Is the input plausible? Would it even be accepted by the system?</p> <p>We also found a lack of shared standards. Key concepts like semantic preservation and plausibility are used inconsistently and often left undefined. Code is frequently missing. Benchmarks are almost non-existent. And most attacks are tested on just one dataset and undefended models, making comparisons and cumulative progress difficult.</p> <h2 id="where-the-field-goes-next">Where the Field Goes Next</h2> <p>Despite these issues, the space for meaningful research in this domain remains open, especially as paradigms like pretraining, multitask learning, and tabular foundation models continue to emerge. What’s needed now isn’t just more attacks, but a stronger research foundation:</p> <ul> <li>Clear, shared definitions of robustness in tabular ML</li> <li>Benchmarks that reflect real-world constraints</li> <li>Broader, more realistic datasets</li> <li>Reproducible code and cross-domain evaluations</li> </ul> <p>If we want machine learning to be secure and trustworthy in critical systems, from credit scoring to malware detection, we need to stop treating tabular data as an afterthought.</p> <p>It’s time to give it the attention, clarity, and care it deserves.</p>]]></content><author><name></name></author><category term="research"/><category term="adversarial machine learning"/><category term="tabular data"/><category term="AI/ML security"/><summary type="html"><![CDATA[What happens when the most common data format in ML is also the least protected?]]></summary></entry></feed>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.3.4">Jekyll</generator><link href="https://alshedivat.github.io/al-folio/feed.xml" rel="self" type="application/atom+xml"/><link href="https://alshedivat.github.io/al-folio/" rel="alternate" type="text/html" hreflang="en"/><updated>2026-04-26T19:49:16+00:00</updated><id>https://alshedivat.github.io/al-folio/feed.xml</id><title type="html">blank</title><subtitle>A simple, whitespace theme for academics. Based on [*folio](https://github.com/bogoli/-folio) design. </subtitle><entry><title type="html">Google Gemini updates: Flash 1.5, Gemma 2 and Project Astra</title><link href="https://alshedivat.github.io/al-folio/blog/2024/google-gemini-updates-flash-15-gemma-2-and-project-astra/" rel="alternate" type="text/html" title="Google Gemini updates: Flash 1.5, Gemma 2 and Project Astra"/><published>2024-05-14T00:00:00+00:00</published><updated>2024-05-14T00:00:00+00:00</updated><id>https://alshedivat.github.io/al-folio/blog/2024/google-gemini-updates-flash-15-gemma-2-and-project-astra</id><content type="html" xml:base="https://alshedivat.github.io/al-folio/blog/2024/google-gemini-updates-flash-15-gemma-2-and-project-astra/"><![CDATA[]]></content><author><name></name></author><summary type="html"><![CDATA[We’re sharing updates across our Gemini family of models and a glimpse of Project Astra, our vision for the future of AI assistants.]]></summary></entry><entry><title type="html">a post with tabs</title><link href="https://alshedivat.github.io/al-folio/blog/2024/tabs/" rel="alternate" type="text/html" title="a post with tabs"/><published>2024-05-01T00:32:13+00:00</published><updated>2024-05-01T00:32:13+00:00</updated><id>https://alshedivat.github.io/al-folio/blog/2024/tabs</id><content type="html" xml:base="https://alshedivat.github.io/al-folio/blog/2024/tabs/"><![CDATA[<p>This is how a post with <a href="https://github.com/Ovski4/jekyll-tabs">tabs</a> looks like. Note that the tabs could be used for different purposes, not only for code.</p> <h2 id="first-tabs">First tabs</h2> <p>To add tabs, use the following syntax:</p> <div class="language-liquid highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">{%</span><span class="w"> </span><span class="nt">tabs</span><span class="w"> </span><span class="nv">group-name</span><span class="w"> </span><span class="cp">%}</span>
+
+<span class="cp">{%</span><span class="w"> </span><span class="nt">tab</span><span class="w"> </span><span class="nv">group-name</span><span class="w"> </span><span class="nv">tab-name-1</span><span class="w"> </span><span class="cp">%}</span>
+
+Content 1
+
+<span class="cp">{%</span><span class="w"> </span><span class="nt">endtab</span><span class="w"> </span><span class="cp">%}</span>
+
+<span class="cp">{%</span><span class="w"> </span><span class="nt">tab</span><span class="w"> </span><span class="nv">group-name</span><span class="w"> </span><span class="nv">tab-name-2</span><span class="w"> </span><span class="cp">%}</span>
+
+Content 2
+
+<span class="cp">{%</span><span class="w"> </span><span class="nt">endtab</span><span class="w"> </span><span class="cp">%}</span>
+
+<span class="cp">{%</span><span class="w"> </span><span class="nt">endtabs</span><span class="w"> </span><span class="cp">%}</span>
+</code></pre></div></div> <p>With this you can generate visualizations like:</p> <ul id="log" class="tab" data-tab="def119a1-8a80-4ad0-bad2-9f44ef5c7f4e" data-name="log"> <li class="active" id="log-php"> <a href="#">php </a> </li> <li id="log-js"> <a href="#">js </a> </li> <li id="log-ruby"> <a href="#">ruby </a> </li> </ul> <ul class="tab-content" id="def119a1-8a80-4ad0-bad2-9f44ef5c7f4e" data-name="log"> <li class="active"> <div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">var_dump</span><span class="p">(</span><span class="s1">'hello'</span><span class="p">);</span>
+</code></pre></div></div> </li> <li> <div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">hello</span><span class="dl">"</span><span class="p">);</span>
+</code></pre></div></div> </li> <li> <div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">pputs</span> <span class="dl">'</span><span class="s1">hello</span><span class="dl">'</span>
+</code></pre></div></div> </li> </ul> <h2 id="another-example">Another example</h2> <ul id="data-struct" class="tab" data-tab="964f66a6-8fdb-4bbd-ac3a-2e923217a567" data-name="data-struct"> <li class="active" id="data-struct-yaml"> <a href="#">yaml </a> </li> <li id="data-struct-json"> <a href="#">json </a> </li> </ul> <ul class="tab-content" id="964f66a6-8fdb-4bbd-ac3a-2e923217a567" data-name="data-struct"> <li class="active"> <div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">hello</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="s2">"</span><span class="s">whatsup"</span>
+  <span class="pi">-</span> <span class="s2">"</span><span class="s">hi"</span>
+</code></pre></div></div> </li> <li> <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"hello"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"whatsup"</span><span class="p">,</span><span class="w"> </span><span class="s2">"hi"</span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div> </li> </ul> <h2 id="tabs-for-something-else">Tabs for something else</h2> <ul id="something-else" class="tab" data-tab="7abaff7b-1ae8-44d7-a181-716c4dd46afc" data-name="something-else"> <li class="active" id="something-else-text"> <a href="#">text </a> </li> <li id="something-else-quote"> <a href="#">quote </a> </li> <li id="something-else-list"> <a href="#">list </a> </li> </ul> <ul class="tab-content" id="7abaff7b-1ae8-44d7-a181-716c4dd46afc" data-name="something-else"> <li class="active"> <p>Regular text</p> </li> <li> <blockquote> <p>A quote</p> </blockquote> </li> <li> <p>Hipster list</p> <ul> <li>brunch</li> <li>fixie</li> <li>raybans</li> <li>messenger bag</li> </ul> </li> </ul>]]></content><author><name></name></author><category term="sample-posts"/><category term="formatting"/><category term="code"/><summary type="html"><![CDATA[this is what included tabs in a post could look like]]></summary></entry><entry><title type="html">a post with typograms</title><link href="https://alshedivat.github.io/al-folio/blog/2024/typograms/" rel="alternate" type="text/html" title="a post with typograms"/><published>2024-04-29T23:36:10+00:00</published><updated>2024-04-29T23:36:10+00:00</updated><id>https://alshedivat.github.io/al-folio/blog/2024/typograms</id><content type="html" xml:base="https://alshedivat.github.io/al-folio/blog/2024/typograms/"><![CDATA[<p>This is an example post with some <a href="https://github.com/google/typograms/">typograms</a> code.</p> <div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">```</span><span class="nl">typograms
+</span><span class="sb">+----+
+|    |---&gt; My first diagram!
++----+</span>
+<span class="p">```</span>
+</code></pre></div></div> <p>Which generates:</p> <pre><code class="language-typograms">+----+
+|    |---&gt; My first diagram!
++----+
+</code></pre> <p>Another example:</p> <div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">```</span><span class="nl">typograms
+</span><span class="sb">.------------------------.
+|.----------------------.|
+||"https://example.com" ||
+|'----------------------'|
+| ______________________ |
+||                      ||
+||   Welcome!           ||
+||                      ||
+||                      ||
+||  .----------------.  ||
+||  | username       |  ||
+||  '----------------'  ||
+||  .----------------.  ||
+||  |"*******"       |  ||
+||  '----------------'  ||
+||                      ||
+||  .----------------.  ||
+||  |   "Sign-up"    |  ||
+||  '----------------'  ||
+||                      ||
+|+----------------------+|
+.------------------------.</span>
+<span class="p">```</span>
+</code></pre></div></div> <p>which generates:</p> <pre><code class="language-typograms">.------------------------.
+|.----------------------.|
+||"https://example.com" ||
+|'----------------------'|
+| ______________________ |
+||                      ||
+||   Welcome!           ||
+||                      ||
+||                      ||
+||  .----------------.  ||
+||  | username       |  ||
+||  '----------------'  ||
+||  .----------------.  ||
+||  |"*******"       |  ||
+||  '----------------'  ||
+||                      ||
+||  .----------------.  ||
+||  |   "Sign-up"    |  ||
+||  '----------------'  ||
+||                      ||
+|+----------------------+|
+.------------------------.
+</code></pre> <p>For more examples, check out the <a href="https://google.github.io/typograms/#examples">typograms documentation</a>.</p>]]></content><author><name></name></author><category term="sample-posts"/><category term="formatting"/><category term="diagrams"/><summary type="html"><![CDATA[this is what included typograms code could look like]]></summary></entry><entry><title type="html">a post that can be cited</title><link href="https://alshedivat.github.io/al-folio/blog/2024/post-citation/" rel="alternate" type="text/html" title="a post that can be cited"/><published>2024-04-28T15:06:00+00:00</published><updated>2024-04-28T15:06:00+00:00</updated><id>https://alshedivat.github.io/al-folio/blog/2024/post-citation</id><content type="html" xml:base="https://alshedivat.github.io/al-folio/blog/2024/post-citation/"><![CDATA[<p>This is an example post that can be cited. The content of the post ends here, while the citation information is automatically provided below. The only thing needed is for you to set the <code class="language-plaintext highlighter-rouge">citation</code> key in the front matter to <code class="language-plaintext highlighter-rouge">true</code>.</p>]]></content><author><name></name></author><category term="sample-posts"/><category term="formatting"/><category term="citation"/><summary type="html"><![CDATA[this is what a post that can be cited looks like]]></summary></entry><entry><title type="html">a post with pseudo code</title><link href="https://alshedivat.github.io/al-folio/blog/2024/pseudocode/" rel="alternate" type="text/html" title="a post with pseudo code"/><published>2024-04-15T00:01:00+00:00</published><updated>2024-04-15T00:01:00+00:00</updated><id>https://alshedivat.github.io/al-folio/blog/2024/pseudocode</id><content type="html" xml:base="https://alshedivat.github.io/al-folio/blog/2024/pseudocode/"><![CDATA[<p>This is an example post with some pseudo code rendered by <a href="https://github.com/SaswatPadhi/pseudocode.js">pseudocode</a>. The example presented here is the same as the one in the <a href="https://saswat.padhi.me/pseudocode.js/">pseudocode.js</a> documentation, with only one simple but important change: everytime you would use <code class="language-plaintext highlighter-rouge">$</code>, you should use <code class="language-plaintext highlighter-rouge">$$</code> instead. Also, note that the <code class="language-plaintext highlighter-rouge">pseudocode</code> key in the front matter is set to <code class="language-plaintext highlighter-rouge">true</code> to enable the rendering of pseudo code. As an example, using this code:</p> <div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">```</span><span class="nl">pseudocode
+</span><span class="sb">% This quicksort algorithm is extracted from Chapter 7, Introduction to Algorithms (3rd edition)
+\begin{algorithm}
+\caption{Quicksort}
+\begin{algorithmic}
+\PROCEDURE{Quicksort}{$$A, p, r$$}
+    \IF{$$p &lt; r$$}
+        \STATE $$q = $$ \CALL{Partition}{$$A, p, r$$}
+        \STATE \CALL{Quicksort}{$$A, p, q - 1$$}
+        \STATE \CALL{Quicksort}{$$A, q + 1, r$$}
+    \ENDIF
+\ENDPROCEDURE
+\PROCEDURE{Partition}{$$A, p, r$$}
+    \STATE $$x = A[r]$$
+    \STATE $$i = p - 1$$
+    \FOR{$$j = p$$ \TO $$r - 1$$}
+        \IF{$$A[j] &lt; x$$}
+            \STATE $$i = i + 1$$
+            \STATE exchange
+            $$A[i]$$ with $$A[j]$$
+        \ENDIF
+        \STATE exchange $$A[i]$$ with $$A[r]$$
+    \ENDFOR
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}</span>
+<span class="p">```</span>
+</code></pre></div></div> <p>Generates:</p> <pre><code class="language-pseudocode">% This quicksort algorithm is extracted from Chapter 7, Introduction to Algorithms (3rd edition)
+\begin{algorithm}
+\caption{Quicksort}
+\begin{algorithmic}
+\PROCEDURE{Quicksort}{$$A, p, r$$}
+    \IF{$$p &lt; r$$}
+        \STATE $$q = $$ \CALL{Partition}{$$A, p, r$$}
+        \STATE \CALL{Quicksort}{$$A, p, q - 1$$}
+        \STATE \CALL{Quicksort}{$$A, q + 1, r$$}
+    \ENDIF
+\ENDPROCEDURE
+\PROCEDURE{Partition}{$$A, p, r$$}
+    \STATE $$x = A[r]$$
+    \STATE $$i = p - 1$$
+    \FOR{$$j = p$$ \TO $$r - 1$$}
+        \IF{$$A[j] &lt; x$$}
+            \STATE $$i = i + 1$$
+            \STATE exchange
+            $$A[i]$$ with $$A[j]$$
+        \ENDIF
+        \STATE exchange $$A[i]$$ with $$A[r]$$
+    \ENDFOR
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</code></pre>]]></content><author><name></name></author><category term="sample-posts"/><category term="formatting"/><category term="code"/><summary type="html"><![CDATA[this is what included pseudo code could look like]]></summary></entry><entry><title type="html">a post with code diff</title><link href="https://alshedivat.github.io/al-folio/blog/2024/code-diff/" rel="alternate" type="text/html" title="a post with code diff"/><published>2024-01-27T19:22:00+00:00</published><updated>2024-01-27T19:22:00+00:00</updated><id>https://alshedivat.github.io/al-folio/blog/2024/code-diff</id><content type="html" xml:base="https://alshedivat.github.io/al-folio/blog/2024/code-diff/"><![CDATA[<p>You can display diff code by using the regular markdown syntax:</p> <div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">```</span><span class="nl">diff
+</span><span class="gh">diff --git a/sample.js b/sample.js
+index 0000001..0ddf2ba
+</span><span class="gd">--- a/sample.js
+</span><span class="gi">+++ b/sample.js
+</span><span class="p">@@ -1 +1 @@</span>
+<span class="gd">-console.log("Hello World!")
+</span><span class="gi">+console.log("Hello from Diff2Html!")</span>
+<span class="p">```</span>
+</code></pre></div></div> <p>Which generates:</p> <div class="language-diff highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gh">diff --git a/sample.js b/sample.js
+index 0000001..0ddf2ba
+</span><span class="gd">--- a/sample.js
+</span><span class="gi">+++ b/sample.js
+</span><span class="p">@@ -1 +1 @@</span>
+<span class="gd">-console.log("Hello World!")
+</span><span class="gi">+console.log("Hello from Diff2Html!")
+</span></code></pre></div></div> <p>But this is difficult to read, specially if you have a large diff. You can use <a href="https://diff2html.xyz/">diff2html</a> to display a more readable version of the diff. For this, just use <code class="language-plaintext highlighter-rouge">diff2html</code> instead of <code class="language-plaintext highlighter-rouge">diff</code> for the code block language:</p> <div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">```</span><span class="nl">diff2html
+</span><span class="sb">diff --git a/sample.js b/sample.js
+index 0000001..0ddf2ba
+--- a/sample.js
++++ b/sample.js
+@@ -1 +1 @@
+-console.log("Hello World!")
++console.log("Hello from Diff2Html!")</span>
+<span class="p">```</span>
+</code></pre></div></div> <p>If we use a longer example, for example <a href="https://github.com/rtfpessoa/diff2html/commit/c2c253d3e3f8b8b267f551e659f72b44ca2ac927">this commit from diff2html</a>, it will generate the following output:</p> <pre><code class="language-diff2html">From 2aaae31cc2a37bfff83430c2c914b140bee59b6a Mon Sep 17 00:00:00 2001
+From: Rodrigo Fernandes &lt;rtfrodrigo@gmail.com&gt;
+Date: Sun, 9 Oct 2016 16:41:54 +0100
+Subject: [PATCH 1/2] Initial template override support
+
+---
+ scripts/hulk.js                    |  4 ++--
+ src/diff2html.js                   |  3 +--
+ src/file-list-printer.js           | 11 ++++++++---
+ src/hoganjs-utils.js               | 29 +++++++++++++++++------------
+ src/html-printer.js                |  6 ++++++
+ src/line-by-line-printer.js        |  6 +++++-
+ src/side-by-side-printer.js        |  6 +++++-
+ test/file-list-printer-tests.js    |  2 +-
+ test/hogan-cache-tests.js          | 18 +++++++++++++++---
+ test/line-by-line-tests.js         |  3 +--
+ test/side-by-side-printer-tests.js |  3 +--
+ 11 files changed, 62 insertions(+), 29 deletions(-)
+
+diff --git a/scripts/hulk.js b/scripts/hulk.js
+index 5a793c18..a4b1a4d5 100755
+--- a/scripts/hulk.js
++++ b/scripts/hulk.js
+@@ -173,11 +173,11 @@ function namespace(name) {
+ // write a template foreach file that matches template extension
+ templates = extractFiles(options.argv.remain)
+   .map(function(file) {
+-    var openedFile = fs.readFileSync(file, 'utf-8');
++    var openedFile = fs.readFileSync(file, 'utf-8').trim();
+     var name;
+     if (!openedFile) return;
+     name = namespace(path.basename(file).replace(/\..*$/, ''));
+-    openedFile = removeByteOrderMark(openedFile.trim());
++    openedFile = removeByteOrderMark(openedFile);
+     openedFile = wrap(file, name, openedFile);
+     if (!options.outputdir) return openedFile;
+     fs.writeFileSync(path.join(options.outputdir, name + '.js')
+diff --git a/src/diff2html.js b/src/diff2html.js
+index 21b0119e..64e138f5 100644
+--- a/src/diff2html.js
++++ b/src/diff2html.js
+@@ -7,7 +7,6 @@
+
+ (function() {
+   var diffParser = require('./diff-parser.js').DiffParser;
+-  var fileLister = require('./file-list-printer.js').FileListPrinter;
+   var htmlPrinter = require('./html-printer.js').HtmlPrinter;
+
+   function Diff2Html() {
+@@ -43,7 +42,7 @@
+
+     var fileList = '';
+     if (configOrEmpty.showFiles === true) {
+-      fileList = fileLister.generateFileList(diffJson, configOrEmpty);
++      fileList = htmlPrinter.generateFileListSummary(diffJson, configOrEmpty);
+     }
+
+     var diffOutput = '';
+diff --git a/src/file-list-printer.js b/src/file-list-printer.js
+index e408d9b2..1e0a2c61 100644
+--- a/src/file-list-printer.js
++++ b/src/file-list-printer.js
+@@ -8,11 +8,16 @@
+ (function() {
+   var printerUtils = require('./printer-utils.js').PrinterUtils;
+
+-  var hoganUtils = require('./hoganjs-utils.js').HoganJsUtils;
++  var hoganUtils;
++
+   var baseTemplatesPath = 'file-summary';
+   var iconsBaseTemplatesPath = 'icon';
+
+-  function FileListPrinter() {
++  function FileListPrinter(config) {
++    this.config = config;
++
++    var HoganJsUtils = require('./hoganjs-utils.js').HoganJsUtils;
++    hoganUtils = new HoganJsUtils(config);
+   }
+
+   FileListPrinter.prototype.generateFileList = function(diffFiles) {
+@@ -38,5 +43,5 @@
+     });
+   };
+
+-  module.exports.FileListPrinter = new FileListPrinter();
++  module.exports.FileListPrinter = FileListPrinter;
+ })();
+diff --git a/src/hoganjs-utils.js b/src/hoganjs-utils.js
+index 9949e5fa..0dda08d7 100644
+--- a/src/hoganjs-utils.js
++++ b/src/hoganjs-utils.js
+@@ -8,18 +8,19 @@
+ (function() {
+   var fs = require('fs');
+   var path = require('path');
+-
+   var hogan = require('hogan.js');
+
+   var hoganTemplates = require('./templates/diff2html-templates.js');
+
+-  var templatesPath = path.resolve(__dirname, 'templates');
++  var extraTemplates;
+
+-  function HoganJsUtils() {
++  function HoganJsUtils(configuration) {
++    this.config = configuration || {};
++    extraTemplates = this.config.templates || {};
+   }
+
+-  HoganJsUtils.prototype.render = function(namespace, view, params, configuration) {
+-    var template = this.template(namespace, view, configuration);
++  HoganJsUtils.prototype.render = function(namespace, view, params) {
++    var template = this.template(namespace, view);
+     if (template) {
+       return template.render(params);
+     }
+@@ -27,17 +28,16 @@
+     return null;
+   };
+
+-  HoganJsUtils.prototype.template = function(namespace, view, configuration) {
+-    var config = configuration || {};
++  HoganJsUtils.prototype.template = function(namespace, view) {
+     var templateKey = this._templateKey(namespace, view);
+
+-    return this._getTemplate(templateKey, config);
++    return this._getTemplate(templateKey);
+   };
+
+-  HoganJsUtils.prototype._getTemplate = function(templateKey, config) {
++  HoganJsUtils.prototype._getTemplate = function(templateKey) {
+     var template;
+
+-    if (!config.noCache) {
++    if (!this.config.noCache) {
+       template = this._readFromCache(templateKey);
+     }
+
+@@ -53,6 +53,7 @@
+
+     try {
+       if (fs.readFileSync) {
++        var templatesPath = path.resolve(__dirname, 'templates');
+         var templatePath = path.join(templatesPath, templateKey);
+         var templateContent = fs.readFileSync(templatePath + '.mustache', 'utf8');
+         template = hogan.compile(templateContent);
+@@ -66,12 +67,16 @@
+   };
+
+   HoganJsUtils.prototype._readFromCache = function(templateKey) {
+-    return hoganTemplates[templateKey];
++    return extraTemplates[templateKey] || hoganTemplates[templateKey];
+   };
+
+   HoganJsUtils.prototype._templateKey = function(namespace, view) {
+     return namespace + '-' + view;
+   };
+
+-  module.exports.HoganJsUtils = new HoganJsUtils();
++  HoganJsUtils.prototype.compile = function(templateStr) {
++    return hogan.compile(templateStr);
++  };
++
++  module.exports.HoganJsUtils = HoganJsUtils;
+ })();
+diff --git a/src/html-printer.js b/src/html-printer.js
+index 585d5b66..13f83047 100644
+--- a/src/html-printer.js
++++ b/src/html-printer.js
+@@ -8,6 +8,7 @@
+ (function() {
+   var LineByLinePrinter = require('./line-by-line-printer.js').LineByLinePrinter;
+   var SideBySidePrinter = require('./side-by-side-printer.js').SideBySidePrinter;
++  var FileListPrinter = require('./file-list-printer.js').FileListPrinter;
+
+   function HtmlPrinter() {
+   }
+@@ -22,5 +23,10 @@
+     return sideBySidePrinter.generateSideBySideJsonHtml(diffFiles);
+   };
+
++  HtmlPrinter.prototype.generateFileListSummary = function(diffJson, config) {
++    var fileListPrinter = new FileListPrinter(config);
++    return fileListPrinter.generateFileList(diffJson);
++  };
++
+   module.exports.HtmlPrinter = new HtmlPrinter();
+ })();
+diff --git a/src/line-by-line-printer.js b/src/line-by-line-printer.js
+index b07eb53c..d230bedd 100644
+--- a/src/line-by-line-printer.js
++++ b/src/line-by-line-printer.js
+@@ -11,7 +11,8 @@
+   var utils = require('./utils.js').Utils;
+   var Rematch = require('./rematch.js').Rematch;
+
+-  var hoganUtils = require('./hoganjs-utils.js').HoganJsUtils;
++  var hoganUtils;
++
+   var genericTemplatesPath = 'generic';
+   var baseTemplatesPath = 'line-by-line';
+   var iconsBaseTemplatesPath = 'icon';
+@@ -19,6 +20,9 @@
+
+   function LineByLinePrinter(config) {
+     this.config = config;
++
++    var HoganJsUtils = require('./hoganjs-utils.js').HoganJsUtils;
++    hoganUtils = new HoganJsUtils(config);
+   }
+
+   LineByLinePrinter.prototype.makeFileDiffHtml = function(file, diffs) {
+diff --git a/src/side-by-side-printer.js b/src/side-by-side-printer.js
+index bbf1dc8d..5e3033b3 100644
+--- a/src/side-by-side-printer.js
++++ b/src/side-by-side-printer.js
+@@ -11,7 +11,8 @@
+   var utils = require('./utils.js').Utils;
+   var Rematch = require('./rematch.js').Rematch;
+
+-  var hoganUtils = require('./hoganjs-utils.js').HoganJsUtils;
++  var hoganUtils;
++
+   var genericTemplatesPath = 'generic';
+   var baseTemplatesPath = 'side-by-side';
+   var iconsBaseTemplatesPath = 'icon';
+@@ -26,6 +27,9 @@
+
+   function SideBySidePrinter(config) {
+     this.config = config;
++
++    var HoganJsUtils = require('./hoganjs-utils.js').HoganJsUtils;
++    hoganUtils = new HoganJsUtils(config);
+   }
+
+   SideBySidePrinter.prototype.makeDiffHtml = function(file, diffs) {
+diff --git a/test/file-list-printer-tests.js b/test/file-list-printer-tests.js
+index a502a46f..60ea3208 100644
+--- a/test/file-list-printer-tests.js
++++ b/test/file-list-printer-tests.js
+@@ -1,6 +1,6 @@
+ var assert = require('assert');
+
+-var fileListPrinter = require('../src/file-list-printer.js').FileListPrinter;
++var fileListPrinter = new (require('../src/file-list-printer.js').FileListPrinter)();
+
+ describe('FileListPrinter', function() {
+   describe('generateFileList', function() {
+diff --git a/test/hogan-cache-tests.js b/test/hogan-cache-tests.js
+index 190bf6f8..3bb754ac 100644
+--- a/test/hogan-cache-tests.js
++++ b/test/hogan-cache-tests.js
+@@ -1,6 +1,6 @@
+ var assert = require('assert');
+
+-var HoganJsUtils = require('../src/hoganjs-utils.js').HoganJsUtils;
++var HoganJsUtils = new (require('../src/hoganjs-utils.js').HoganJsUtils)();
+ var diffParser = require('../src/diff-parser.js').DiffParser;
+
+ describe('HoganJsUtils', function() {
+@@ -21,16 +21,28 @@ describe('HoganJsUtils', function() {
+       });
+       assert.equal(emptyDiffHtml, result);
+     });
++
+     it('should render view without cache', function() {
+       var result = HoganJsUtils.render('generic', 'empty-diff', {
+         contentClass: 'd2h-code-line',
+         diffParser: diffParser
+       }, {noCache: true});
+-      assert.equal(emptyDiffHtml + '\n', result);
++      assert.equal(emptyDiffHtml, result);
+     });
++
+     it('should return null if template is missing', function() {
+-      var result = HoganJsUtils.render('generic', 'missing-template', {}, {noCache: true});
++      var hoganUtils = new (require('../src/hoganjs-utils.js').HoganJsUtils)({noCache: true});
++      var result = hoganUtils.render('generic', 'missing-template', {});
+       assert.equal(null, result);
+     });
++
++    it('should allow templates to be overridden', function() {
++      var emptyDiffTemplate = HoganJsUtils.compile('&lt;p&gt;&lt;/p&gt;');
++
++      var config = {templates: {'generic-empty-diff': emptyDiffTemplate}};
++      var hoganUtils = new (require('../src/hoganjs-utils.js').HoganJsUtils)(config);
++      var result = hoganUtils.render('generic', 'empty-diff', {myName: 'Rodrigo Fernandes'});
++      assert.equal('&lt;p&gt;Rodrigo Fernandes&lt;/p&gt;', result);
++    });
+   });
+ });
+diff --git a/test/line-by-line-tests.js b/test/line-by-line-tests.js
+index 1cd92073..8869b3df 100644
+--- a/test/line-by-line-tests.js
++++ b/test/line-by-line-tests.js
+@@ -14,7 +14,7 @@ describe('LineByLinePrinter', function() {
+         '            File without changes\n' +
+         '        &lt;/div&gt;\n' +
+         '    &lt;/td&gt;\n' +
+-        '&lt;/tr&gt;\n';
++        '&lt;/tr&gt;';
+
+       assert.equal(expected, fileHtml);
+     });
+@@ -422,7 +422,6 @@ describe('LineByLinePrinter', function() {
+         '        &lt;/div&gt;\n' +
+         '    &lt;/td&gt;\n' +
+         '&lt;/tr&gt;\n' +
+-        '\n' +
+         '                &lt;/tbody&gt;\n' +
+         '            &lt;/table&gt;\n' +
+         '        &lt;/div&gt;\n' +
+diff --git a/test/side-by-side-printer-tests.js b/test/side-by-side-printer-tests.js
+index 76625f8e..771daaa5 100644
+--- a/test/side-by-side-printer-tests.js
++++ b/test/side-by-side-printer-tests.js
+@@ -14,7 +14,7 @@ describe('SideBySidePrinter', function() {
+         '            File without changes\n' +
+         '        &lt;/div&gt;\n' +
+         '    &lt;/td&gt;\n' +
+-        '&lt;/tr&gt;\n';
++        '&lt;/tr&gt;';
+
+       assert.equal(expectedRight, fileHtml.right);
+       assert.equal(expectedLeft, fileHtml.left);
+@@ -324,7 +324,6 @@ describe('SideBySidePrinter', function() {
+         '        &lt;/div&gt;\n' +
+         '    &lt;/td&gt;\n' +
+         '&lt;/tr&gt;\n' +
+-        '\n' +
+         '                    &lt;/tbody&gt;\n' +
+         '                &lt;/table&gt;\n' +
+         '            &lt;/div&gt;\n' +
+
+From f3cadb96677d0eb82fc2752dc3ffbf35ca9b5bdb Mon Sep 17 00:00:00 2001
+From: Rodrigo Fernandes &lt;rtfrodrigo@gmail.com&gt;
+Date: Sat, 15 Oct 2016 13:21:22 +0100
+Subject: [PATCH 2/2] Allow uncompiled templates
+
+---
+ README.md                 |  3 +++
+ src/hoganjs-utils.js      |  7 +++++++
+ test/hogan-cache-tests.js | 24 +++++++++++++++++++++++-
+ 3 files changed, 33 insertions(+), 1 deletion(-)
+
+diff --git a/README.md b/README.md
+index 132c8a28..46909f25 100644
+--- a/README.md
++++ b/README.md
+@@ -98,6 +98,9 @@ The HTML output accepts a Javascript object with configuration. Possible options
+   - `synchronisedScroll`: scroll both panes in side-by-side mode: `true` or `false`, default is `false`
+   - `matchWordsThreshold`: similarity threshold for word matching, default is 0.25
+   - `matchingMaxComparisons`: perform at most this much comparisons for line matching a block of changes, default is `2500`
++  - `templates`: object with previously compiled templates to replace parts of the html
++  - `rawTemplates`: object with raw not compiled templates to replace parts of the html
++  &gt; For more information regarding the possible templates look into [src/templates](https://github.com/rtfpessoa/diff2html/tree/master/src/templates)
+
+ ## Diff2HtmlUI Helper
+
+diff --git a/src/hoganjs-utils.js b/src/hoganjs-utils.js
+index 0dda08d7..b2e9c275 100644
+--- a/src/hoganjs-utils.js
++++ b/src/hoganjs-utils.js
+@@ -17,6 +17,13 @@
+   function HoganJsUtils(configuration) {
+     this.config = configuration || {};
+     extraTemplates = this.config.templates || {};
++
++    var rawTemplates = this.config.rawTemplates || {};
++    for (var templateName in rawTemplates) {
++      if (rawTemplates.hasOwnProperty(templateName)) {
++        if (!extraTemplates[templateName]) extraTemplates[templateName] = this.compile(rawTemplates[templateName]);
++      }
++    }
+   }
+
+   HoganJsUtils.prototype.render = function(namespace, view, params) {
+diff --git a/test/hogan-cache-tests.js b/test/hogan-cache-tests.js
+index 3bb754ac..a34839c0 100644
+--- a/test/hogan-cache-tests.js
++++ b/test/hogan-cache-tests.js
+@@ -36,7 +36,7 @@ describe('HoganJsUtils', function() {
+       assert.equal(null, result);
+     });
+
+-    it('should allow templates to be overridden', function() {
++    it('should allow templates to be overridden with compiled templates', function() {
+       var emptyDiffTemplate = HoganJsUtils.compile('&lt;p&gt;&lt;/p&gt;');
+
+       var config = {templates: {'generic-empty-diff': emptyDiffTemplate}};
+@@ -44,5 +44,27 @@ describe('HoganJsUtils', function() {
+       var result = hoganUtils.render('generic', 'empty-diff', {myName: 'Rodrigo Fernandes'});
+       assert.equal('&lt;p&gt;Rodrigo Fernandes&lt;/p&gt;', result);
+     });
++
++    it('should allow templates to be overridden with uncompiled templates', function() {
++      var emptyDiffTemplate = '&lt;p&gt;&lt;/p&gt;';
++
++      var config = {rawTemplates: {'generic-empty-diff': emptyDiffTemplate}};
++      var hoganUtils = new (require('../src/hoganjs-utils.js').HoganJsUtils)(config);
++      var result = hoganUtils.render('generic', 'empty-diff', {myName: 'Rodrigo Fernandes'});
++      assert.equal('&lt;p&gt;Rodrigo Fernandes&lt;/p&gt;', result);
++    });
++
++    it('should allow templates to be overridden giving priority to compiled templates', function() {
++      var emptyDiffTemplate = HoganJsUtils.compile('&lt;p&gt;&lt;/p&gt;');
++      var emptyDiffTemplateUncompiled = '&lt;p&gt;Not used!&lt;/p&gt;';
++
++      var config = {
++        templates: {'generic-empty-diff': emptyDiffTemplate},
++        rawTemplates: {'generic-empty-diff': emptyDiffTemplateUncompiled}
++      };
++      var hoganUtils = new (require('../src/hoganjs-utils.js').HoganJsUtils)(config);
++      var result = hoganUtils.render('generic', 'empty-diff', {myName: 'Rodrigo Fernandes'});
++      assert.equal('&lt;p&gt;Rodrigo Fernandes&lt;/p&gt;', result);
++    });
+   });
+ });
+</code></pre>]]></content><author><name></name></author><category term="sample-posts"/><category term="formatting"/><category term="code"/><summary type="html"><![CDATA[this is how you can display code diffs]]></summary></entry><entry><title type="html">a post with advanced image components</title><link href="https://alshedivat.github.io/al-folio/blog/2024/advanced-images/" rel="alternate" type="text/html" title="a post with advanced image components"/><published>2024-01-27T11:46:00+00:00</published><updated>2024-01-27T11:46:00+00:00</updated><id>https://alshedivat.github.io/al-folio/blog/2024/advanced-images</id><content type="html" xml:base="https://alshedivat.github.io/al-folio/blog/2024/advanced-images/"><![CDATA[<p>This is an example post with advanced image components.</p> <h2 id="image-slider">Image Slider</h2> <p>This is a simple image slider. It uses the <a href="https://swiperjs.com/">Swiper</a> library. Check the <a href="https://swiperjs.com/demos">examples page</a> for more information of what you can achieve with it.</p> <swiper-container keyboard="true" navigation="true" pagination="true" pagination-clickable="true" pagination-dynamic-bullets="true" rewind="true"> <swiper-slide> <figure> <picture> <source class="responsive-img-srcset" srcset="/al-folio/assets/img/9.jpg" sizes="95vw"/> <img src="/al-folio/assets/img/9.jpg" class="img-fluid rounded z-depth-1" width="100%" height="auto" loading="eager" onerror="this.onerror=null; $('.responsive-img-srcset').remove();"/> </picture> </figure> </swiper-slide> <swiper-slide> <figure> <picture> <source class="responsive-img-srcset" srcset="/al-folio/assets/img/7.jpg" sizes="95vw"/> <img src="/al-folio/assets/img/7.jpg" class="img-fluid rounded z-depth-1" width="100%" height="auto" loading="eager" onerror="this.onerror=null; $('.responsive-img-srcset').remove();"/> </picture> </figure> </swiper-slide> <swiper-slide> <figure> <picture> <source class="responsive-img-srcset" srcset="/al-folio/assets/img/8.jpg" sizes="95vw"/> <img src="/al-folio/assets/img/8.jpg" class="img-fluid rounded z-depth-1" width="100%" height="auto" loading="eager" onerror="this.onerror=null; $('.responsive-img-srcset').remove();"/> </picture> </figure> </swiper-slide> <swiper-slide> <figure> <picture> <source class="responsive-img-srcset" srcset="/al-folio/assets/img/10.jpg" sizes="95vw"/> <img src="/al-folio/assets/img/10.jpg" class="img-fluid rounded z-depth-1" width="100%" height="auto" loading="eager" onerror="this.onerror=null; $('.responsive-img-srcset').remove();"/> </picture> </figure> </swiper-slide> <swiper-slide> <figure> <picture> <source class="responsive-img-srcset" srcset="/al-folio/assets/img/12.jpg" sizes="95vw"/> <img src="/al-folio/assets/img/12.jpg" class="img-fluid rounded z-depth-1" width="100%" height="auto" loading="eager" onerror="this.onerror=null; $('.responsive-img-srcset').remove();"/> </picture> </figure> </swiper-slide> </swiper-container> <h2 id="image-comparison-slider">Image Comparison Slider</h2> <p>This is a simple image comparison slider. It uses the <a href="https://img-comparison-slider.sneas.io/">img-comparison-slider</a> library. Check the <a href="https://img-comparison-slider.sneas.io/examples.html">examples page</a> for more information of what you can achieve with it.</p> <img-comparison-slider> <figure slot="first"> <picture> <source class="responsive-img-srcset" srcset="/al-folio/assets/img/prof_pic.jpg" sizes="95vw"/> <img src="/al-folio/assets/img/prof_pic.jpg" class="img-fluid rounded z-depth-1" width="100%" height="auto" loading="lazy" onerror="this.onerror=null; $('.responsive-img-srcset').remove();"/> </picture> </figure> <figure slot="second"> <picture> <source class="responsive-img-srcset" srcset="/al-folio/assets/img/prof_pic_color.png" sizes="95vw"/> <img src="/al-folio/assets/img/prof_pic_color.png" class="img-fluid rounded z-depth-1" width="100%" height="auto" loading="lazy" onerror="this.onerror=null; $('.responsive-img-srcset').remove();"/> </picture> </figure> </img-comparison-slider>]]></content><author><name></name></author><category term="sample-posts"/><category term="formatting"/><category term="images"/><summary type="html"><![CDATA[this is what advanced image components could look like]]></summary></entry><entry><title type="html">a post with vega lite</title><link href="https://alshedivat.github.io/al-folio/blog/2024/vega-lite/" rel="alternate" type="text/html" title="a post with vega lite"/><published>2024-01-27T00:20:00+00:00</published><updated>2024-01-27T00:20:00+00:00</updated><id>https://alshedivat.github.io/al-folio/blog/2024/vega-lite</id><content type="html" xml:base="https://alshedivat.github.io/al-folio/blog/2024/vega-lite/"><![CDATA[<p>This is an example post with some <a href="https://vega.github.io/vega-lite/">vega lite</a> code.</p> <div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">```</span><span class="nl">vega_lite
+</span><span class="sb">{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "A dot plot showing each movie in the database, and the difference from the average movie rating. The display is sorted by year to visualize everything in sequential order. The graph is for all Movies before 2019.",
+  "data": {
+    "url": "https://raw.githubusercontent.com/vega/vega/main/docs/data/movies.json"
+  },
+  "transform": [
+    {"filter": "datum['IMDB Rating'] != null"},
+    {"filter": {"timeUnit": "year", "field": "Release Date", "range": [null, 2019]}},
+    {
+      "joinaggregate": [{
+        "op": "mean",
+        "field": "IMDB Rating",
+        "as": "AverageRating"
+      }]
+    },
+    {
+      "calculate": "datum['IMDB Rating'] - datum.AverageRating",
+      "as": "RatingDelta"
+    }
+  ],
+  "mark": "point",
+  "encoding": {
+    "x": {
+      "field": "Release Date",
+      "type": "temporal"
+    },
+    "y": {
+      "field": "RatingDelta",
+      "type": "quantitative",
+      "title": "Rating Delta"
+    },
+    "color": {
+      "field": "RatingDelta",
+      "type": "quantitative",
+      "scale": {"domainMid": 0},
+      "title": "Rating Delta"
+    }
+  }
+}</span>
+<span class="p">```</span>
+</code></pre></div></div> <p>Which generates:</p> <pre><code class="language-vega_lite">{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "A dot plot showing each movie in the database, and the difference from the average movie rating. The display is sorted by year to visualize everything in sequential order. The graph is for all Movies before 2019.",
+  "data": {
+    "url": "https://raw.githubusercontent.com/vega/vega/main/docs/data/movies.json"
+  },
+  "transform": [
+    {"filter": "datum['IMDB Rating'] != null"},
+    {"filter": {"timeUnit": "year", "field": "Release Date", "range": [null, 2019]}},
+    {
+      "joinaggregate": [{
+        "op": "mean",
+        "field": "IMDB Rating",
+        "as": "AverageRating"
+      }]
+    },
+    {
+      "calculate": "datum['IMDB Rating'] - datum.AverageRating",
+      "as": "RatingDelta"
+    }
+  ],
+  "mark": "point",
+  "encoding": {
+    "x": {
+      "field": "Release Date",
+      "type": "temporal"
+    },
+    "y": {
+      "field": "RatingDelta",
+      "type": "quantitative",
+      "title": "Rating Delta"
+    },
+    "color": {
+      "field": "RatingDelta",
+      "type": "quantitative",
+      "scale": {"domainMid": 0},
+      "title": "Rating Delta"
+    }
+  }
+}
+</code></pre> <p>This plot supports both light and dark themes.</p>]]></content><author><name></name></author><category term="sample-posts"/><category term="formatting"/><category term="charts"/><summary type="html"><![CDATA[this is what included vega lite code could look like]]></summary></entry><entry><title type="html">a post with geojson</title><link href="https://alshedivat.github.io/al-folio/blog/2024/geojson-map/" rel="alternate" type="text/html" title="a post with geojson"/><published>2024-01-26T17:57:00+00:00</published><updated>2024-01-26T17:57:00+00:00</updated><id>https://alshedivat.github.io/al-folio/blog/2024/geojson-map</id><content type="html" xml:base="https://alshedivat.github.io/al-folio/blog/2024/geojson-map/"><![CDATA[<p>This is an example post with some <a href="https://geojson.org/">geojson</a> code. The support is provided thanks to <a href="https://leafletjs.com/">Leaflet</a>. To create your own visualization, go to <a href="https://geojson.io/">geojson.io</a>.</p> <div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">```</span><span class="nl">geojson
+</span><span class="sb">{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {},
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              -60.11363029935569,
+              -2.904625022183211
+            ],
+            [
+              -60.11363029935569,
+              -3.162613728707967
+            ],
+            [
+              -59.820894493858034,
+              -3.162613728707967
+            ],
+            [
+              -59.820894493858034,
+              -2.904625022183211
+            ],
+            [
+              -60.11363029935569,
+              -2.904625022183211
+            ]
+          ]
+        ],
+        "type": "Polygon"
+      }
+    }
+  ]
+}</span>
+<span class="p">```</span>
+</code></pre></div></div> <p>Which generates:</p> <pre><code class="language-geojson">{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {},
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              -60.11363029935569,
+              -2.904625022183211
+            ],
+            [
+              -60.11363029935569,
+              -3.162613728707967
+            ],
+            [
+              -59.820894493858034,
+              -3.162613728707967
+            ],
+            [
+              -59.820894493858034,
+              -2.904625022183211
+            ],
+            [
+              -60.11363029935569,
+              -2.904625022183211
+            ]
+          ]
+        ],
+        "type": "Polygon"
+      }
+    }
+  ]
+}
+</code></pre>]]></content><author><name></name></author><category term="sample-posts"/><category term="formatting"/><category term="charts"/><category term="maps"/><summary type="html"><![CDATA[this is what included geojson code could look like]]></summary></entry><entry><title type="html">a post with echarts</title><link href="https://alshedivat.github.io/al-folio/blog/2024/echarts/" rel="alternate" type="text/html" title="a post with echarts"/><published>2024-01-26T16:03:00+00:00</published><updated>2024-01-26T16:03:00+00:00</updated><id>https://alshedivat.github.io/al-folio/blog/2024/echarts</id><content type="html" xml:base="https://alshedivat.github.io/al-folio/blog/2024/echarts/"><![CDATA[<p>This is an example post with some <a href="https://echarts.apache.org/">echarts</a> code.</p> <div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">```</span><span class="nl">echarts
+</span><span class="sb">{
+  "title": {
+    "text": "ECharts Getting Started Example"
+  },
+  "responsive": true,
+  "tooltip": {},
+  "legend": {
+    "top": "30px",
+    "data": ["sales"]
+  },
+  "xAxis": {
+    "data": ["Shirts", "Cardigans", "Chiffons", "Pants", "Heels", "Socks"]
+  },
+  "yAxis": {},
+  "series": [
+    {
+      "name": "sales",
+      "type": "bar",
+      "data": [5, 20, 36, 10, 10, 20]
+    }
+  ]
+}</span>
+<span class="p">```</span>
+</code></pre></div></div> <p>Which generates:</p> <pre><code class="language-echarts">{
+  "title": {
+    "text": "ECharts Getting Started Example"
+  },
+  "responsive": true,
+  "tooltip": {},
+  "legend": {
+    "top": "30px",
+    "data": ["sales"]
+  },
+  "xAxis": {
+    "data": ["Shirts", "Cardigans", "Chiffons", "Pants", "Heels", "Socks"]
+  },
+  "yAxis": {},
+  "series": [
+    {
+      "name": "sales",
+      "type": "bar",
+      "data": [5, 20, 36, 10, 10, 20]
+    }
+  ]
+}
+</code></pre> <p>Note that this library offer support for both light and dark themes. You can switch between them using the theme switcher in the top right corner of the page.</p>]]></content><author><name></name></author><category term="sample-posts"/><category term="formatting"/><category term="charts"/><summary type="html"><![CDATA[this is what included echarts code could look like]]></summary></entry></feed>
